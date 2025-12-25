@@ -10,9 +10,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . /app
 
-# Make entrypoint executable (Linux container, not Windows)
 RUN chmod +x /app/entrypoint.sh
+RUN adduser --disabled-password appuser || true
+USER appuser
 
-EXPOSE 8000
+EXPOSE 8080
 
 ENTRYPOINT ["/app/entrypoint.sh"]
