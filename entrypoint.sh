@@ -1,5 +1,8 @@
-#!/usr/bin/env bash
+#!/bin/sh
 set -e
-# start ETL in background, then start API
-python -m ingestion.run &
-exec uvicorn api.main:app --host 0.0.0.0 --port 8000
+
+echo "Starting ETL process..."
+python ingestion/run.py || true
+
+echo "Starting FastAPI server..."
+exec uvicorn api.main:app --host 0.0.0.0 --port ${PORT:-8000}
