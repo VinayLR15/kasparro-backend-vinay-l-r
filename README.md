@@ -1,209 +1,277 @@
-# Kasparro - Backend & ETL Systems
+```md
+# Kasparro – Backend & ETL Systems Assignment
 
-**Project Overview**
-- **What**: A production-grade backend and ETL system that ingests crypto asset data (APIs + CSV), stores raw payloads, normalizes assets, and exposes a FastAPI for querying and observability.
-- **Why production-grade**: transactional checkpoints, idempotent writes, structured JSON logging, Docker-ready deployment, isolated tests, and controlled failure-injection with deterministic recovery.
+## Project Overview
 
-**Architecture**
-- **API layer**: [api/main.py](api/main.py) — FastAPI routes only; business logic lives in [services/](services).
-- **ETL ingestion layer**: [ingestion/run.py](ingestion/run.py) orchestrates per-source ingestion, writes into `raw_assets` and normalized `assets`, and records runs in `etl_runs`.
-- **Raw vs Normalized**: raw payloads persist unchanged in `raw_assets`; canonical data is stored in `assets` for downstream use.
-- **Checkpointing & recovery**: per-source checkpoint in `etl_checkpoints` stores `last_record_id`. Checkpoints are committed before any injected failure so reruns resume safely from last committed point.
+This project implements a **production-grade backend and ETL system** as specified in the Kasparro Backend & ETL Systems assignment.
 
-**ETL Design**
-- **Sources**: CoinPaprika (`COINPAPRIKA_API_KEY`), CoinGecko, and CSV ([ingestion/data/assets.csv](ingestion/data/assets.csv)).
-- **Incremental ingestion**: Streams are processed until an item matching the checkpoint is observed; ingestion resumes after that point to avoid reprocessing.
-- **Idempotent writes**: Unique constraints and existence checks prevent duplicates; ETL writes raw records idempotently and uses upsert-like semantics for `assets`.
-- **Unified schema**: Pydantic validation via schemas in [schemas/asset.py](schemas/asset.py) ensures normalized records conform to `Asset` model.
+The system ingests crypto asset data from multiple sources (APIs and CSV), stores raw payloads, normalizes data into a unified schema, and exposes a FastAPI service for querying, monitoring, and observability.
 
-**P2 Highlight — Failure Injection & Strong Recovery**
-- **How it works**: Set env `ETL_FAIL_AFTER_N_RECORDS` to an integer. When configured, the ETL will intentionally raise an exception after N processed records to simulate partial failure.
-- **Checkpoint commit**: Checkpoints (`etl_checkpoints`) are updated and committed before the injected failure is raised so progress is durable.
-- **Recovery**: Re-running the ETL reads the checkpoint and resumes from the next record; session/transactional handling ensures no partially committed duplicates.
-- **Duplicate avoidance**: Raw records have a unique index (source+record_id); normalized assets use a uniqueness constraint on `(external_id, source)` preventing duplicates across retries.
+The implementation focuses on **robust ETL design**, **incremental ingestion**, **failure recovery**, **clean architecture**, and **cloud-ready deployment**.
 
-**API Endpoints**
-- **GET /data**: pagination + optional `q` filter. Returns `request_id`, `api_latency_ms`, paging metadata, and `data` array.
-- **GET /health**: DB connectivity and last ETL run status summary. Implementation: [api/main.py](api/main.py).
-- **GET /stats**: aggregated ETL stats (records processed, last success/failure timestamps) from `etl_runs`.
+---
 
-**How to Run Locally**
-- Build & run (Docker): `make up` (uses `docker-compose.yml` with Postgres + app).
-- Teardown: `make down`.
-- Run tests: `make test` or `pytest` (tests use isolated SQLite DB via `conftest.py`).
-- Windows note: use Git Bash or PowerShell with proper environment handling; tests are designed to run on Windows (temporary DB files handled).
+## Architecture
 
-**Testing Strategy**
-- **Coverage**: ETL transformations, incremental ingestion, failure injection + recovery, idempotent writes, schema mismatch handling, and API endpoints.
-- **Isolation**: Tests use per-test SQLite instances and monkeypatching of external sources to ensure determinism ([tests/](tests)).
-- **Recovery tests**: [tests/test_etl.py](tests/test_etl.py) simulates an injected failure, asserts checkpoint state and failed run(s), then reruns ETL to verify resume and idempotency.
+### API Layer
+- **Location**: `api/main.py`
+- Built using **FastAPI**
+- Routes only; no business logic in controllers
+- Exposes health, data, stats, and documentation endpoints
 
-**Smoke Test / Live Demo**
+### ETL Layer
+- **Location**: `ingestion/run.py`
+- Orchestrates ingestion from all data sources
+- Writes raw data and normalized assets
+- Records ETL runs and checkpoints
 
-Complete end-to-end verification in under 5 minutes. Follow these steps to validate the system and P2.2 failure injection + recovery.
+### Data Storage
+- **raw_assets**: Stores raw source payloads unchanged
+- **assets**: Stores normalized, canonical asset records
+- **etl_runs**: Tracks ETL execution metadata
+- **etl_checkpoints**: Stores per-source incremental progress
 
-**Step 1: Start the System**
+### Clean Separation
+```
+
+api/          → API routes
+ingestion/   → ETL orchestration
+services/    → Business logic
+schemas/     → Pydantic validation
+core/        → DB, config, logging
+tests/       → Automated tests
+
+````
+
+---
+
+## ETL Design
+
+### Data Sources
+- CoinPaprika API (configured via environment variable)
+- CoinGecko API
+- CSV file (`ingestion/data/assets.csv`)
+
+### Incremental Ingestion
+- Each source maintains a checkpoint (`last_record_id`)
+- On restart, ETL resumes after the checkpoint
+- Prevents reprocessing of already ingested data
+
+### Idempotent Writes
+- Raw records are unique by `(source, record_id)`
+- Normalized assets are unique by `(external_id, source)`
+- Duplicate inserts are safely ignored
+
+### Unified Schema
+- Pydantic models in `schemas/asset.py`
+- Ensures consistent normalized asset structure across all sources
+
+---
+
+## P2 Highlight — Failure Injection & Strong Recovery
+
+### Controlled Failure Injection
+Configure using environment variable:
+```bash
+ETL_FAIL_AFTER_N_RECORDS=2
+````
+
+* ETL intentionally raises an exception after processing N records
+* Simulates partial pipeline failure
+
+### Checkpoint Commit
+
+* Checkpoints are committed **before** failure
+* Ensures progress is durable
+
+### Recovery
+
+* Restart ETL without the failure variable
+* ETL resumes from the next record
+* No partially committed or duplicate data
+
+---
+
+## API Endpoints
+
+### GET /
+
+Returns service metadata and available endpoints
+
+### GET /data
+
+* Pagination with `limit` and `offset`
+* Optional `q` search filter
+* Returns:
+
+  * `request_id`
+  * `api_latency_ms`
+  * Paging metadata
+  * Asset data array
+
+### GET /health
+
+* Database connectivity status
+* Last ETL run summary
+
+### GET /stats
+
+* Aggregated ETL metrics from `etl_runs`
+* Records processed
+* Success and failure timestamps
+
+### GET /docs
+
+* Swagger API documentation
+
+---
+
+## Live Deployment (Railway)
+
+**Base URL**
+
+```
+https://kasparro-backend-vinay-l-r-production.up.railway.app
+```
+
+**Quick Checks**
+
+* `/health`
+* `/data?limit=5`
+* `/docs`
+
+---
+
+## How to Run Locally
+
+### Docker
 
 ```bash
 docker compose up --build
 ```
 
-Confirm the API is reachable:
+Verify:
+
 ```bash
-curl http://localhost:8000/health
+curl http://localhost:8080/health
 ```
 
-Expected: HTTP 200 with health status JSON.
+### Tests
+
+```bash
+python -m pytest -q
+```
+
+Tests use isolated SQLite databases and mocked external sources.
 
 ---
 
-**Step 2: Initial ETL Run (Successful)**
+## Smoke Test / Live Demo
 
-Watch the ETL ingestion logs during container startup (logs show structured JSON with source, records_processed, status).
+### Step 1: Start the System
 
-Query the health endpoint:
 ```bash
-curl http://localhost:8000/health
+docker compose up --build
 ```
 
-Query stats for ETL run summary:
+Confirm:
+
 ```bash
-curl http://localhost:8000/stats
+curl http://localhost:8080/health
 ```
 
-Expected: `status: "success"`, non-zero `records_processed`, `last_run_timestamp`.
+### Step 2: Initial ETL Run
 
----
+```bash
+curl http://localhost:8080/stats
+```
 
-**Step 3: Inject Controlled Failure (P2.2 Demo)**
+Expected:
 
-Stop the running container:
+* `status: "success"`
+* Non-zero `records_processed`
+
+### Step 3: Inject Controlled Failure
+
 ```bash
 docker compose down
+ETL_FAIL_AFTER_N_RECORDS=2 docker compose up --build
 ```
 
-Set the failure injection environment variable and restart:
-```bash
-export ETL_FAIL_AFTER_N_RECORDS=2
-docker compose up --build
-```
+Expected:
 
-Watch logs — ETL will process 2 records then raise an exception. Logs show failure and checkpoint state (JSON structured logs).
+* ETL fails after 2 records
+* Failure recorded in `etl_runs`
 
-Query stats to confirm failed run:
-```bash
-curl http://localhost:8000/stats
-```
+### Step 4: Recovery Run
 
-Expected: `status: "failed"`, `records_processed: 2`, failed run timestamp recorded in `etl_runs`.
-
----
-
-**Step 4: Recovery Run (Resume from Checkpoint)**
-
-Remove the failure injection and restart:
 ```bash
 docker compose down
 unset ETL_FAIL_AFTER_N_RECORDS
 docker compose up --build
 ```
 
-Watch logs — ETL reads checkpoint and resumes from record 3 onward (logs show "Resuming from checkpoint").
+Expected:
 
-Query stats:
+* ETL resumes from checkpoint
+* No duplicate records
+* Successful run recorded
+
+### Step 5: API Validation
+
 ```bash
-curl http://localhost:8000/stats
+curl "http://localhost:8080/data?limit=5"
+curl http://localhost:8080/health
+curl http://localhost:8080/stats
 ```
-
-Expected: `status: "success"`, `records_processed > 2` (continued from checkpoint), no duplicate records in `assets` table (verify via DB).
 
 ---
 
-**Step 5: API Validation**
+## Cloud Deployment Notes
 
-Test data endpoint with pagination:
-```bash
-curl "http://localhost:8000/data?limit=5&offset=0"
-```
-
-Expected: `request_id`, `api_latency_ms`, `paging` metadata, and `data` array with up to 5 assets.
-
-Test health endpoint:
-```bash
-curl http://localhost:8000/health
-```
-
-Expected: HTTP 200, DB connected, last ETL run summary.
-
-Test stats endpoint:
-```bash
-curl http://localhost:8000/stats
-```
-
-Expected: Aggregated ETL run metrics (total records, success/failure counts, timestamps).
+* Fully Dockerized and cloud-ready
+* Compatible with AWS, GCP, and Azure
+* Database configurable via `DATABASE_URL`
+* Logs emitted as structured JSON to stdout
+* ETL can be scheduled using cron or cloud schedulers
 
 ---
 
-**Step 6: Test Verification**
+## Configuration
 
-Run the full test suite locally (tests use isolated SQLite DB, no external dependencies):
-```bash
-python -m pytest -q
+Environment variables:
+
+* `DATABASE_URL`
+* `COINPAPRIKA_API_KEY`
+* `ETL_FAIL_AFTER_N_RECORDS` (optional)
+
+No secrets are hardcoded in the repository.
+
+---
+
+## Repository
+
+GitHub:
+
+```
+https://github.com/VinayLR15/kasparro-backend-vinay-l-r
 ```
 
-Expected: All tests pass (e.g., `4 passed, 21 warnings in 2.81s`).
+---
 
-Tests cover:
-- ETL transformations and incremental ingestion
-- Failure injection + recovery (P2.2)
-- Idempotent writes (no duplicates after retry)
-- API endpoints and schema validation
+## Submission Checklist
 
-**Cloud Deployment Notes**
-
-This service is production-ready for cloud deployment with minimal configuration changes.
-
-**Compute Platforms:**
-- **AWS**: Deploy via ECS (Fargate) with Postgres RDS, or EC2 with managed PostgreSQL.
-- **GCP**: Use Cloud Run for the API (stateless, scales automatically) and Cloud SQL for PostgreSQL.
-- **Azure**: Deploy via Container Instances or Azure App Service with managed PostgreSQL database.
-
-**ETL Scheduling:**
-- **AWS**: Use EventBridge (CloudWatch Events) to trigger ETL via Lambda or directly call the ingestion endpoint.
-- **GCP**: Use Cloud Scheduler to invoke the ETL endpoint on a fixed schedule.
-- **Azure**: Use Azure Logic Apps or Scheduled Compute Tasks to trigger the ingestion.
-- **On-Prem**: Use cron jobs (e.g., `0 */6 * * * python -m ingestion.run`) for periodic runs.
-
-**Logs & Metrics:**
-- Logs are emitted as structured JSON to stdout; pipe them to:
-  - AWS CloudWatch (ECS automatically forwards logs).
-  - GCP Cloud Logging (Cloud Run automatically integrates).
-  - Azure Monitor / Application Insights (configure output integration).
-- Metrics: Query `/stats` endpoint for ETL run counts, success/failure rates, and processing latency.
-
-**Database Migration:**
-- Update `DATABASE_URL` environment variable to point to your cloud Postgres instance.
-- Run migrations on first deployment (tables are auto-created on app startup via SQLAlchemy).
+* [x] Docker runs locally without errors
+* [x] All tests passing
+* [x] ETL recovery verified
+* [x] No secrets committed
+* [x] Public cloud deployment working
 
 ---
 
-**Notes**
-- Pydantic v2 prints deprecation warnings for some `Field(..., env=...)` usage; these are non-blocking.
-- `DATABASE_URL` is the single configuration entry to swap DBs for cloud deployments (Postgres on AWS/GCP/Azure).
-- Logs are emitted as structured JSON to stdout for cloud ingestion (CloudWatch, Stackdriver, etc.).
+## Status
 
-For implementation details, see [ingestion/run.py](ingestion/run.py), [core/models.py](core/models.py), and [tests/test_etl.py](tests/test_etl.py).
+**Assignment complete, deployed, and production-ready.**
 
----
-
-**Submission Checklist**
-
-Before submitting to evaluators, verify:
-
-- [ ] Docker runs locally: `docker compose up --build` starts without errors.
-- [ ] Tests passing: `python -m pytest -q` returns all tests passing (e.g., `4 passed`).
-- [ ] No secrets committed: `COINPAPRIKA_API_KEY` not hardcoded; use `.env` or environment variables.
-- [ ] API endpoints verified: `curl http://localhost:8000/health` and `curl http://localhost:8000/data` return expected responses.
-- [ ] ETL recovery verified: Run with `ETL_FAIL_AFTER_N_RECORDS=2`, confirm failure, then remove env var and confirm recovery with no duplicates.
-
-For deployment validation, follow the **Smoke Test / Live Demo** section above.
+```
+```
