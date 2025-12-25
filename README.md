@@ -273,5 +273,3 @@ https://github.com/VinayLR15/kasparro-backend-vinay-l-r
 
 **Assignment complete, deployed, and production-ready.**
 
-```
-```
