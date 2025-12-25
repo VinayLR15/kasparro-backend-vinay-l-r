@@ -10,14 +10,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . /app
 
-# Create user
-RUN adduser --disabled-password --gecos "" appuser \
-    && chown -R appuser:appuser /app \
-    && chmod +x /app/entrypoint.sh
+# Make entrypoint executable (Linux container, not Windows)
+RUN chmod +x /app/entrypoint.sh
 
-USER appuser
-
-# Railway injects PORT automatically
 EXPOSE 8000
 
 ENTRYPOINT ["/app/entrypoint.sh"]

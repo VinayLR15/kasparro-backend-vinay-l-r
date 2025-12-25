@@ -4,5 +4,7 @@ set -e
 echo "Starting ETL process..."
 python ingestion/run.py || true
 
-echo "Starting FastAPI server on port $PORT"
-exec uvicorn api.main:app --host 0.0.0.0 --port ${PORT}
+echo "Starting FastAPI server on port ${PORT:-8000}"
+exec uvicorn api.main:app \
+  --host 0.0.0.0 \
+  --port ${PORT:-8000}
