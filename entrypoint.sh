@@ -1,12 +1,14 @@
 #!/bin/sh
 set -e
 
-echo "Starting ETL process..."
-python ingestion/run.py || echo "ETL process completed with errors (non-blocking)"
-
 PORT=${PORT:-8000}
 echo "Starting FastAPI server on port $PORT"
 
+# Run ETL in background (non-blocking) - don't wait for it
+echo "Starting ETL process in background..."
+python ingestion/run.py || echo "ETL process completed with errors (non-blocking)" &
+
+# Start FastAPI immediately - this is the main process
 exec uvicorn api.main:app \
   --host 0.0.0.0 \
   --port $PORT \

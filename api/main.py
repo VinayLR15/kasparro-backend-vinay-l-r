@@ -74,9 +74,21 @@ async def add_request_id_and_timing(request: Request, call_next):
 
 @app.get("/health")
 def health():
-    db_ok = check_connection()
-    last = ETLService.last_run()
+    """Health check endpoint - must work even if DB isn't ready."""
+    try:
+        db_ok = check_connection()
+    except Exception as e:
+        logger.warning(f"Health check: DB connection failed: {e}")
+        db_ok = False
+    
+    last = None
+    try:
+        last = ETLService.last_run()
+    except Exception as e:
+        logger.warning(f"Health check: Could not get last ETL run: {e}")
+    
     return {
+        "status": "ok" if db_ok else "degraded",
         "db": db_ok,
         "last_etl": {
             "status": last.status if last else None,
