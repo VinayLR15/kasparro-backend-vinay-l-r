@@ -20,8 +20,24 @@ SOURCE_CLASSES = {
 
 
 def _ensure_tables():
+    """Ensure database tables exist with retry logic."""
+    import time
     from core import models
-    models.Base.metadata.create_all(bind=engine)
+    max_retries = 5
+    retry_delay = 2
+    
+    for attempt in range(max_retries):
+        try:
+            models.Base.metadata.create_all(bind=engine)
+            logger.info("Database tables verified/created")
+            return
+        except Exception as e:
+            if attempt < max_retries - 1:
+                logger.warning(f"Failed to create tables (attempt {attempt + 1}/{max_retries}): {e}. Retrying...")
+                time.sleep(retry_delay)
+            else:
+                logger.error(f"Failed to create tables after {max_retries} attempts: {e}")
+                raise
 
 
 def _process_stream(source_name: str, items: Iterable[Dict[str, Any]], fail_after: int | None = None):

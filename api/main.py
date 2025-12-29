@@ -4,6 +4,7 @@ import logging
 from fastapi import FastAPI, Request
 from core.logging_setup import setup_logging
 from core.db import check_connection, engine
+from core.config import settings
 from services.api_service import APIService
 from services.etl_service import ETLService
 from core import models
@@ -11,8 +12,37 @@ from core import models
 logger = logging.getLogger("api")
 app = FastAPI(title="Kasparro Backend & ETL")
 
-# ensure tables exist at startup
-models.Base.metadata.create_all(bind=engine)
+# ensure tables exist at startup (with retry logic for cloud deployments)
+def ensure_tables():
+    """Create tables with retry logic for cloud deployments."""
+    import time
+    max_retries = 5
+    retry_delay = 2
+    
+    for attempt in range(max_retries):
+        try:
+            models.Base.metadata.create_all(bind=engine)
+            logger.info("Database tables created successfully")
+            return
+        except Exception as e:
+            if attempt < max_retries - 1:
+                logger.warning(f"Failed to create tables (attempt {attempt + 1}/{max_retries}): {e}. Retrying...")
+                time.sleep(retry_delay)
+            else:
+                logger.error(f"Failed to create tables after {max_retries} attempts: {e}")
+                # Don't raise - let the app start and handle DB errors gracefully
+
+# Call ensure_tables at startup (non-blocking for health checks)
+try:
+    ensure_tables()
+except Exception as e:
+    logger.error(f"Warning: Could not create tables at startup: {e}. App will continue but may have DB issues.")
+
+@app.on_event("startup")
+async def startup_event():
+    """Log startup for debugging."""
+    logger.info("FastAPI application started")
+    logger.info(f"Database URL configured: {settings.DATABASE_URL[:20]}..." if len(settings.DATABASE_URL) > 20 else f"Database URL: {settings.DATABASE_URL}")
 
 
 @app.get("/")
