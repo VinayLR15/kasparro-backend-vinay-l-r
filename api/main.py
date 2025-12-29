@@ -1,7 +1,9 @@
 import time
 import uuid
 import logging
+import threading
 from fastapi import FastAPI, Request
+from sqlalchemy import text
 from core.logging_setup import setup_logging
 from core.db import check_connection, engine
 from core.config import settings
@@ -16,27 +18,37 @@ app = FastAPI(title="Kasparro Backend & ETL")
 def ensure_tables():
     """Create tables with retry logic for cloud deployments."""
     import time
-    max_retries = 5
-    retry_delay = 2
+    max_retries = 10
+    retry_delay = 3
     
     for attempt in range(max_retries):
         try:
+            # First check if we can connect
+            with engine.connect() as conn:
+                conn.execute(text("SELECT 1"))
+            # If connection works, create tables
             models.Base.metadata.create_all(bind=engine)
             logger.info("Database tables created successfully")
-            return
+            return True
         except Exception as e:
             if attempt < max_retries - 1:
-                logger.warning(f"Failed to create tables (attempt {attempt + 1}/{max_retries}): {e}. Retrying...")
+                logger.debug(f"Database not ready (attempt {attempt + 1}/{max_retries}): {str(e)[:100]}. Retrying...")
                 time.sleep(retry_delay)
             else:
-                logger.error(f"Failed to create tables after {max_retries} attempts: {e}")
-                # Don't raise - let the app start and handle DB errors gracefully
+                logger.warning(f"Could not create tables after {max_retries} attempts. App will start but database features may be unavailable.")
+                return False
+    return False
 
 # Call ensure_tables at startup (non-blocking for health checks)
-try:
-    ensure_tables()
-except Exception as e:
-    logger.error(f"Warning: Could not create tables at startup: {e}. App will continue but may have DB issues.")
+# Run in background to not block startup
+def init_tables_background():
+    try:
+        ensure_tables()
+    except Exception as e:
+        logger.error(f"Error in background table initialization: {e}")
+
+# Start table initialization in background thread
+threading.Thread(target=init_tables_background, daemon=True).start()
 
 @app.on_event("startup")
 async def startup_event():
@@ -133,10 +145,14 @@ def get_data(limit: int = 50, offset: int = 0, q: str | None = None, request: Re
     except Exception as e:
         logger.exception("Error in /data endpoint: %s", e)
         latency = int((time.time() - start) * 1000)
+        # Check if it's a database connection issue
+        error_msg = "Service temporarily unavailable"
+        if "connection" in str(e).lower() or "database" in str(e).lower():
+            error_msg = "Database connection unavailable. Please ensure database is configured and running."
         return {
             "request_id": request.state.request_id if hasattr(request.state, 'request_id') else None,
             "api_latency_ms": latency,
-            "error": "Database connection failed. Please check database configuration.",
+            "error": error_msg,
             "limit": limit,
             "offset": offset,
             "total": 0,
@@ -151,8 +167,12 @@ def stats():
         return ETLService.stats()
     except Exception as e:
         logger.exception("Error in /stats endpoint: %s", e)
+        # Check if it's a database connection issue
+        error_msg = "Service temporarily unavailable"
+        if "connection" in str(e).lower() or "database" in str(e).lower():
+            error_msg = "Database connection unavailable. Please ensure database is configured and running."
         return {
-            "error": "Database connection failed. Please check database configuration.",
+            "error": error_msg,
             "total_runs": 0,
             "total_records_processed": 0,
             "last_success": {

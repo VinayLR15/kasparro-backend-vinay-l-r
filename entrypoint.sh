@@ -4,6 +4,10 @@ set -e
 PORT=${PORT:-8000}
 echo "Starting FastAPI server on port $PORT"
 
+# Wait a bit for database to be ready (if available)
+echo "Waiting for database connection..."
+sleep 2
+
 # Run ETL in background (non-blocking) - don't wait for it
 echo "Starting ETL process in background..."
 python ingestion/run.py || echo "ETL process completed with errors (non-blocking)" &

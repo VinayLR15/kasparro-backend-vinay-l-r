@@ -50,14 +50,24 @@ def get_session():
         db.close()
 
 def check_connection():
-    """Check database connection with detailed error logging."""
-    try:
-        with engine.connect() as conn:
-            conn.execute(text("SELECT 1"))
-        return True
-    except OperationalError as e:
-        logger.warning(f"Database connection failed: {e}")
-        return False
-    except Exception as e:
-        logger.error(f"Unexpected error checking database connection: {e}")
-        return False
+    """Check database connection with retry logic for cloud deployments."""
+    import time
+    max_retries = 3
+    retry_delay = 1
+    
+    for attempt in range(max_retries):
+        try:
+            with engine.connect() as conn:
+                conn.execute(text("SELECT 1"))
+            return True
+        except OperationalError as e:
+            if attempt < max_retries - 1:
+                logger.debug(f"Database connection attempt {attempt + 1}/{max_retries} failed, retrying...")
+                time.sleep(retry_delay)
+            else:
+                logger.warning(f"Database connection failed after {max_retries} attempts: {str(e)[:100]}")
+                return False
+        except Exception as e:
+            logger.error(f"Unexpected error checking database connection: {e}")
+            return False
+    return False
