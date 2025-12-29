@@ -145,6 +145,8 @@ Returns service metadata and available endpoints
 https://kasparro-backend-vinay-l-r-production.up.railway.app
 ```
 
+**Note**: The deployment requires a PostgreSQL database. If endpoints return database connection errors, ensure a PostgreSQL service is provisioned in the Railway project.
+
 **Quick Checks**
 
 * `/health`
