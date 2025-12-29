@@ -1,6 +1,6 @@
 import pytest
 import ingestion.run
-from core.models import ETLRun, Checkpoint, RawAsset, Asset
+from core.models import ETLRun, Checkpoint, RawAsset, Coin, CoinSource
 
 
 @pytest.fixture(autouse=False)
@@ -35,11 +35,13 @@ def test_etl_runs_and_writes():
     ingestion.run.run_all()
     # run again to test idempotency (should not duplicate)
     ingestion.run.run_all()
-    # check that assets table has entries
+    # check that canonical coins are created
     from core.db import SessionLocal
     with SessionLocal() as s:
-        count = s.query(Asset).count()
-        assert count >= 2
+        coin_count = s.query(Coin).count()
+        source_count = s.query(CoinSource).count()
+        assert coin_count >= 2, f"Expected at least 2 canonical coins, got {coin_count}"
+        assert source_count >= 2, f"Expected at least 2 source mappings, got {source_count}"
 
 
 def test_failure_injection_and_recovery(monkeypatch):
@@ -95,9 +97,11 @@ def test_failure_injection_and_recovery(monkeypatch):
         assert ck.last_record_id == "r1", f"Checkpoint points to {ck.last_record_id}, not r1"
 
         raw_count = s.query(RawAsset).filter(RawAsset.source == "csv").count()
-        asset_count = s.query(Asset).count()
+        coin_count = s.query(Coin).count()
+        source_count = s.query(CoinSource).filter(CoinSource.source == "csv").count()
         assert raw_count == 1, f"Expected 1 raw record, got {raw_count}"
-        assert asset_count == 1, f"Expected 1 asset, got {asset_count}"
+        assert coin_count == 1, f"Expected 1 canonical coin, got {coin_count}"
+        assert source_count == 1, f"Expected 1 source mapping, got {source_count}"
 
     # === PHASE 2: Resume without failure injection ===
     monkeypatch.delenv("ETL_FAIL_AFTER_N_RECORDS", raising=False)
@@ -121,13 +125,59 @@ def test_failure_injection_and_recovery(monkeypatch):
         ck = s.query(Checkpoint).filter(Checkpoint.source == "csv").one_or_none()
         assert ck.last_record_id == "r3", f"Checkpoint should be r3, got {ck.last_record_id}"
 
-        # Should have exactly 3 assets, no duplicates
-        asset_count = s.query(Asset).count()
-        assert asset_count == 3, f"Expected 3 assets total, got {asset_count}"
+        # Should have exactly 3 canonical coins, no duplicates
+        coin_count = s.query(Coin).count()
+        source_count = s.query(CoinSource).filter(CoinSource.source == "csv").count()
+        assert coin_count == 3, f"Expected 3 canonical coins total, got {coin_count}"
+        assert source_count == 3, f"Expected 3 source mappings, got {source_count}"
 
     # === PHASE 3: Verify idempotency ===
     ingestion.run.run_all()
     from core.db import SessionLocal
     with SessionLocal() as s:
-        final_count = s.query(Asset).count()
-        assert final_count == 3, f"Idempotency check failed: got {final_count} assets"
+        final_coin_count = s.query(Coin).count()
+        final_source_count = s.query(CoinSource).filter(CoinSource.source == "csv").count()
+        assert final_coin_count == 3, f"Idempotency check failed: got {final_coin_count} coins"
+        assert final_source_count == 3, f"Idempotency check failed: got {final_source_count} source mappings"
+
+
+def test_normalization_unifies_coins_across_sources(monkeypatch):
+    """Test that the same coin from different sources creates one canonical coin."""
+    class BitcoinSource1:
+        """First source with Bitcoin."""
+        def list_assets(self):
+            yield {"id": "bitcoin-cp", "symbol": "BTC", "name": "Bitcoin", "raw": {"id": "bitcoin-cp", "symbol": "BTC"}}
+    
+    class BitcoinSource2:
+        """Second source with Bitcoin (same symbol, different external_id)."""
+        def list_assets(self):
+            yield {"id": "bitcoin", "symbol": "BTC", "name": "Bitcoin", "raw": {"id": "bitcoin", "symbol": "BTC"}}
+    
+    class EmptySource:
+        def list_assets(self):
+            if False:
+                yield
+    
+    # Patch sources: two sources both have BTC
+    monkeypatch.setattr(ingestion.run, "CoinPaprikaSource", lambda: BitcoinSource1())
+    monkeypatch.setattr(ingestion.run, "CoinGeckoSource", lambda: BitcoinSource2())
+    monkeypatch.setattr(ingestion.run, "CSVSource", lambda: EmptySource())
+    
+    # Run ETL
+    ingestion.run.run_all()
+    
+    from core.db import SessionLocal
+    with SessionLocal() as s:
+        # Should have exactly 1 canonical coin (BTC)
+        btc_coins = s.query(Coin).filter(Coin.symbol == "BTC").all()
+        assert len(btc_coins) == 1, f"Expected 1 canonical BTC coin, got {len(btc_coins)}"
+        
+        btc_coin = btc_coins[0]
+        # Should have 2 source mappings (one from each source)
+        btc_sources = s.query(CoinSource).filter(CoinSource.coin_id == btc_coin.id).all()
+        assert len(btc_sources) == 2, f"Expected 2 source mappings for BTC, got {len(btc_sources)}"
+        
+        # Verify both sources are present
+        source_names = {cs.source for cs in btc_sources}
+        assert "coinpaprika" in source_names, "Missing coinpaprika source"
+        assert "coingecko" in source_names, "Missing coingecko source"

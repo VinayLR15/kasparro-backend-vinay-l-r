@@ -27,7 +27,8 @@ The implementation focuses on **robust ETL design**, **incremental ingestion**, 
 
 ### Data Storage
 - **raw_assets**: Stores raw source payloads unchanged
-- **assets**: Stores normalized, canonical asset records
+- **coins**: Stores canonical coin entities (unified by symbol across all sources)
+- **coin_sources**: Links source-specific data to canonical coins (enables identity unification)
 - **etl_runs**: Tracks ETL execution metadata
 - **etl_checkpoints**: Stores per-source incremental progress
 
@@ -57,14 +58,17 @@ tests/       → Automated tests
 - On restart, ETL resumes after the checkpoint
 - Prevents reprocessing of already ingested data
 
+### Normalization & Identity Unification
+- **Canonical Coins**: Coins are unified by symbol (case-insensitive) across all sources
+- Same coin from different sources (e.g., Bitcoin from CoinGecko and CoinPaprika) creates **one canonical coin**
+- Source-specific data is linked to canonical coins via `coin_sources` table
+- Example: BTC from CoinGecko and BTC from CoinPaprika → 1 canonical BTC coin with 2 source mappings
+
 ### Idempotent Writes
 - Raw records are unique by `(source, record_id)`
-- Normalized assets are unique by `(external_id, source)`
+- Canonical coins are unique by `symbol` (normalized to uppercase)
+- Source mappings are unique by `(coin_id, source)` and `(source, external_id)`
 - Duplicate inserts are safely ignored
-
-### Unified Schema
-- Pydantic models in `schemas/asset.py`
-- Ensures consistent normalized asset structure across all sources
 
 ---
 
@@ -101,13 +105,20 @@ Returns service metadata and available endpoints
 ### GET /data
 
 * Pagination with `limit` and `offset`
-* Optional `q` search filter
-* Returns:
+* Optional `q` search filter (searches coin symbol and name)
+* Returns canonical coins with their source mappings:
 
   * `request_id`
   * `api_latency_ms`
   * Paging metadata
-  * Asset data array
+  * `data` array with:
+    * `id`: Canonical coin ID
+    * `symbol`: Coin symbol (normalized, uppercase)
+    * `name`: Coin name
+    * `sources`: Array of source mappings, each with:
+      * `source`: Source name (coinpaprika, coingecko, csv)
+      * `external_id`: Source-specific ID
+      * `source_metadata`: Source-specific raw data
 
 ### GET /health
 
@@ -153,7 +164,7 @@ docker compose up --build
 Verify:
 
 ```bash
-curl http://localhost:8080/health
+curl http://localhost:8000/health
 ```
 
 ### Tests
@@ -177,7 +188,7 @@ docker compose up --build
 Confirm:
 
 ```bash
-curl http://localhost:8080/health
+curl http://localhost:8000/health
 ```
 
 ### Step 2: Initial ETL Run
@@ -220,9 +231,9 @@ Expected:
 ### Step 5: API Validation
 
 ```bash
-curl "http://localhost:8080/data?limit=5"
-curl http://localhost:8080/health
-curl http://localhost:8080/stats
+curl "http://localhost:8000/data?limit=5"
+curl http://localhost:8000/health
+curl http://localhost:8000/stats
 ```
 
 ---

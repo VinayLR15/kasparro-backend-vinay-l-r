@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, JSON, DateTime, func, Boolean, UniqueConstraint
+from sqlalchemy import Column, Integer, String, JSON, DateTime, func, Boolean, UniqueConstraint, ForeignKey, Index
 from sqlalchemy.orm import relationship
 from .db import Base
 
@@ -11,7 +11,39 @@ class RawAsset(Base):
     ingested_at = Column(DateTime(timezone=True), server_default=func.now())
     __table_args__ = (UniqueConstraint('source','record_id',name='uq_raw_source_record'),)
 
+class Coin(Base):
+    """Canonical coin entity - unified identity across all sources."""
+    __tablename__ = "coins"
+    id = Column(Integer, primary_key=True)
+    symbol = Column(String, nullable=False, unique=True, index=True)
+    name = Column(String, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    
+    # Relationship to source mappings
+    sources = relationship("CoinSource", back_populates="coin", cascade="all, delete-orphan")
+
+class CoinSource(Base):
+    """Links source-specific data to canonical coins."""
+    __tablename__ = "coin_sources"
+    id = Column(Integer, primary_key=True)
+    coin_id = Column(Integer, ForeignKey("coins.id", ondelete="CASCADE"), nullable=False, index=True)
+    source = Column(String, nullable=False)
+    external_id = Column(String, nullable=False)
+    source_metadata = Column(JSON, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    __table_args__ = (
+        UniqueConstraint('coin_id', 'source', name='uq_coin_source'),
+        UniqueConstraint('source', 'external_id', name='uq_source_external_id'),
+        Index('idx_source_external_id', 'source', 'external_id'),
+    )
+    
+    # Relationship to canonical coin
+    coin = relationship("Coin", back_populates="sources")
+
+# Keep Asset for backward compatibility during migration, but it's deprecated
 class Asset(Base):
+    """Deprecated: Use Coin and CoinSource instead."""
     __tablename__ = "assets"
     id = Column(Integer, primary_key=True)
     symbol = Column(String, nullable=False)

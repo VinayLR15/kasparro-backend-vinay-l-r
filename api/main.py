@@ -32,6 +32,8 @@ def root():
 @app.middleware("http")
 async def add_request_id_and_timing(request: Request, call_next):
     request_id = str(uuid.uuid4())
+    # Store request_id in request state for use in endpoints
+    request.state.request_id = request_id
     start = time.time()
     response = await call_next(request)
     latency = int((time.time() - start) * 1000)
@@ -55,23 +57,34 @@ def health():
 
 @app.get("/data")
 def get_data(limit: int = 50, offset: int = 0, q: str | None = None, request: Request = None):
+    """
+    Get canonical coins with their source mappings.
+    Returns unified coins (normalized by symbol) showing all sources for each coin.
+    """
     start = time.time()
     items, total = APIService.list_assets(limit=limit, offset=offset, q=q)
     latency = int((time.time() - start) * 1000)
     return {
-        "request_id": request.headers.get("X-Request-Id"),
+        "request_id": request.state.request_id if hasattr(request.state, 'request_id') else None,
         "api_latency_ms": latency,
         "limit": limit,
         "offset": offset,
         "total": total,
         "data": [
             {
-                "id": a.id,
-                "external_id": a.external_id,
-                "symbol": a.symbol,
-                "name": a.name,
-                "source": a.source
-            } for a in items
+                "id": item["coin"].id,
+                "symbol": item["coin"].symbol,
+                "name": item["coin"].name,
+                "sources": [
+                    {
+                        "source": cs.source,
+                        "external_id": cs.external_id,
+                        "source_metadata": cs.source_metadata
+                    }
+                    for cs in item["sources"]
+                ]
+            }
+            for item in items
         ]
     }
 
