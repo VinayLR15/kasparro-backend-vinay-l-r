@@ -104,33 +104,64 @@ def get_data(limit: int = 50, offset: int = 0, q: str | None = None, request: Re
     Returns unified coins (normalized by symbol) showing all sources for each coin.
     """
     start = time.time()
-    items, total = APIService.list_assets(limit=limit, offset=offset, q=q)
-    latency = int((time.time() - start) * 1000)
-    return {
-        "request_id": request.state.request_id if hasattr(request.state, 'request_id') else None,
-        "api_latency_ms": latency,
-        "limit": limit,
-        "offset": offset,
-        "total": total,
-        "data": [
-            {
-                "id": item["coin"].id,
-                "symbol": item["coin"].symbol,
-                "name": item["coin"].name,
-                "sources": [
-                    {
-                        "source": cs.source,
-                        "external_id": cs.external_id,
-                        "source_metadata": cs.source_metadata
-                    }
-                    for cs in item["sources"]
-                ]
-            }
-            for item in items
-        ]
-    }
+    try:
+        items, total = APIService.list_assets(limit=limit, offset=offset, q=q)
+        latency = int((time.time() - start) * 1000)
+        return {
+            "request_id": request.state.request_id if hasattr(request.state, 'request_id') else None,
+            "api_latency_ms": latency,
+            "limit": limit,
+            "offset": offset,
+            "total": total,
+            "data": [
+                {
+                    "id": item["coin"].id,
+                    "symbol": item["coin"].symbol,
+                    "name": item["coin"].name,
+                    "sources": [
+                        {
+                            "source": cs.source,
+                            "external_id": cs.external_id,
+                            "source_metadata": cs.source_metadata
+                        }
+                        for cs in item["sources"]
+                    ]
+                }
+                for item in items
+            ]
+        }
+    except Exception as e:
+        logger.exception("Error in /data endpoint: %s", e)
+        latency = int((time.time() - start) * 1000)
+        return {
+            "request_id": request.state.request_id if hasattr(request.state, 'request_id') else None,
+            "api_latency_ms": latency,
+            "error": "Database connection failed. Please check database configuration.",
+            "limit": limit,
+            "offset": offset,
+            "total": 0,
+            "data": []
+        }
 
 
 @app.get("/stats")
 def stats():
-    return ETLService.stats()
+    """Get ETL statistics. Returns empty stats if database is not available."""
+    try:
+        return ETLService.stats()
+    except Exception as e:
+        logger.exception("Error in /stats endpoint: %s", e)
+        return {
+            "error": "Database connection failed. Please check database configuration.",
+            "total_runs": 0,
+            "total_records_processed": 0,
+            "last_success": {
+                "timestamp": None,
+                "records_processed": None,
+                "duration_seconds": None,
+            },
+            "last_failure": {
+                "timestamp": None,
+                "error": None,
+            },
+        }

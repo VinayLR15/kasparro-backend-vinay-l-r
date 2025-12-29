@@ -2,15 +2,42 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy.exc import OperationalError
 from .config import settings
+import logging
 
-# create engine with connection pooling and retry settings for cloud deployments
+logger = logging.getLogger("core.db")
+
+# Normalize DATABASE_URL for Railway/cloud deployments
+# Railway may provide postgres:// but SQLAlchemy needs postgresql://
+def normalize_database_url(url: str) -> str:
+    """Normalize database URL for compatibility."""
+    if url.startswith("postgres://"):
+        # Convert postgres:// to postgresql:// for SQLAlchemy
+        url = url.replace("postgres://", "postgresql+psycopg2://", 1)
+    elif url.startswith("postgresql://") and "+psycopg2" not in url:
+        # Ensure psycopg2 driver is specified
+        url = url.replace("postgresql://", "postgresql+psycopg2://", 1)
+    return url
+
+# Create engine with connection pooling and retry settings for cloud deployments
 # pool_pre_ping=True ensures connections are validated before use
+db_url = normalize_database_url(settings.DATABASE_URL)
+is_postgres = "postgresql" in db_url.lower() or "postgres" in db_url.lower()
+
+connect_args = {}
+if is_postgres:
+    connect_args = {
+        "connect_timeout": 10,
+        # Railway/cloud databases often require SSL
+        "sslmode": "prefer"  # Try SSL but fallback to non-SSL if needed
+    }
+
 engine = create_engine(
-    settings.DATABASE_URL,
+    db_url,
     future=True,
     pool_pre_ping=True,  # Verify connections before using
     pool_recycle=300,    # Recycle connections after 5 minutes
-    connect_args={"connect_timeout": 10} if "postgresql" in settings.DATABASE_URL else {}
+    connect_args=connect_args,
+    echo=False  # Set to True for debugging SQL queries
 )
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
 Base = declarative_base()
@@ -23,9 +50,14 @@ def get_session():
         db.close()
 
 def check_connection():
+    """Check database connection with detailed error logging."""
     try:
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
         return True
-    except OperationalError:
+    except OperationalError as e:
+        logger.warning(f"Database connection failed: {e}")
+        return False
+    except Exception as e:
+        logger.error(f"Unexpected error checking database connection: {e}")
         return False
