@@ -194,7 +194,7 @@ curl http://localhost:8000/health
 ### Step 2: Initial ETL Run
 
 ```bash
-curl http://localhost:8080/stats
+curl http://localhost:8000/stats
 ```
 
 Expected:
