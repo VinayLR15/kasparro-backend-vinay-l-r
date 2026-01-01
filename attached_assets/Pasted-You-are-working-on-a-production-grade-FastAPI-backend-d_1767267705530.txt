@@ -1,0 +1,131 @@
+You are working on a production-grade FastAPI backend deployed on Railway.
+
+TASKS:
+
+1. Update the ROOT endpoint (`GET /`) so that it returns EXACTLY this JSON response:
+{
+  "service": "Kasparro Backend & ETL",
+  "status": "ok",
+  "endpoints": {
+    "docs": "/docs",
+    "health": "/health",
+    "data": "/data",
+    "stats": "/stats",
+    "etl_run": "/etl/run (POST)"
+  }
+}
+
+- Do NOT change any other endpoint behavior
+- Keep existing functionality intact
+
+--------------------------------------------------
+
+2. Create / update a `README.md` file that is:
+- Clear
+- Well structured
+- Professional
+- Easy to understand for recruiters and reviewers
+
+The README MUST include the following sections (in this order):
+
+### 1. Project Overview
+- What the Kasparro Backend & ETL system does
+- What problem it solves
+- High-level purpose
+
+### 2. Tech Stack
+- Python
+- FastAPI
+- SQLAlchemy
+- PostgreSQL
+- Railway
+- ETL concepts
+(brief explanation for each)
+
+### 3. System Architecture (Step-by-Step)
+Explain clearly:
+1. API layer (FastAPI)
+2. ETL pipeline flow
+3. Database layer
+4. Service layer separation
+5. Background task execution
+
+Write in simple, clear English.
+
+### 4. API Endpoints
+Document:
+- GET /
+- GET /docs
+- GET /health
+- GET /data
+- GET /stats
+- POST /etl/run
+
+For each endpoint include:
+- Purpose
+- Method
+- Sample response (short)
+
+### 5. Folder Structure
+Include a clean folder tree like this (example – adapt to actual project):
+
+kasparro-backend/
+│
+├── api/
+│ └── main.py
+│
+├── core/
+│ ├── db.py
+│ ├── models.py
+│ └── logging_setup.py
+│
+├── services/
+│ ├── api_service.py
+│ └── etl_service.py
+│
+├── ingestion/
+│ └── run.py
+│
+├── README.md
+├── requirements.txt
+└── Dockerfile
+
+markdown
+Copy code
+
+Explain what each major folder is responsible for.
+
+### 6. Local Setup (Step-by-Step)
+Explain clearly:
+1. Clone repository
+2. Create virtual environment
+3. Install dependencies
+4. Set environment variables
+5. Run the server
+
+### 7. Deployment (Railway)
+Explain:
+- How the app is deployed
+- Use of PORT environment variable
+- Production readiness
+
+### 8. ETL Flow Explanation
+Explain:
+- How ETL is triggered
+- How data is fetched
+- How it is stored
+- How `/data` reads from DB
+
+--------------------------------------------------
+
+CONSTRAINTS:
+- Do NOT add mock data
+- Do NOT change database schema
+- Do NOT break existing APIs
+- Keep wording professional and interview-ready
+- Use Markdown properly
+- Make the README suitable for GitHub
+
+OUTPUT:
+- Updated root endpoint code (if needed)
+- Complete `README.md` content

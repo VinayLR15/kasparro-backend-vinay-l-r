@@ -24,7 +24,17 @@ async def startup():
 
 @app.get("/", status_code=200)
 def root():
-    return {"status": "ok"}
+    return {
+        "service": "Kasparro Backend & ETL",
+        "status": "ok",
+        "endpoints": {
+            "docs": "/docs",
+            "health": "/health",
+            "data": "/data",
+            "stats": "/stats",
+            "etl_run": "/etl/run (POST)"
+        }
+    }
 
 @app.head("/")
 def root_head():
