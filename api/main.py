@@ -64,7 +64,6 @@ def data(limit: int = 50, offset: int = 0, q: str | None = None, request: Reques
     try:
         items, total = APIService.list_assets(limit, offset, q)
         return {
-            "request_id": request.state.request_id if request else None,
             "latency_ms": int((time.time() - start) * 1000),
             "total": total,
             "data": items,
@@ -72,7 +71,6 @@ def data(limit: int = 50, offset: int = 0, q: str | None = None, request: Reques
     except Exception:
         logger.exception("/data failed")
         return {
-            "request_id": request.state.request_id if request else None,
             "error": "Database unavailable",
             "data": [],
         }
