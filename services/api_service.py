@@ -52,11 +52,15 @@ class APIService:
                     select(CoinSource).where(CoinSource.coin_id == coin.id).limit(1)
                 ).scalar_one_or_none()
                 
+                source_val = "unknown"
+                if primary_source:
+                    source_val = str(primary_source.source.value if hasattr(primary_source.source, "value") else primary_source.source)
+
                 serialized_data.append({
                     "id": coin.id,
                     "symbol": coin.symbol,
                     "name": coin.name,
-                    "source": primary_source.source if primary_source else "unknown",
+                    "source": source_val,
                     "external_id": primary_source.external_id if primary_source else "unknown"
                 })
             
