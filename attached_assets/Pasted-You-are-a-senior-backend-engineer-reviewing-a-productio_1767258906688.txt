@@ -1,0 +1,58 @@
+You are a senior backend engineer reviewing a production crypto data ingestion service.
+
+Context:
+- The system ingests coin metadata from CoinPaprika and CoinGecko.
+- Symbol collisions are common (e.g., WETH, SOL, USDC) across different assets.
+- We intentionally want idempotent ingestion with NO crashes and NO data corruption.
+
+Current problem:
+- Symbol collisions are correctly detected and skipped, but they are logged as errors.
+- Logs appear noisy and misleading even though the system is working as intended.
+- README does not clearly explain this design decision.
+- Some files/logging patterns feel unpolished.
+
+Your tasks:
+
+1. **Code fixes**
+   - Update ingestion logic so symbol collisions are:
+     - Skipped intentionally
+     - Logged as `INFO` or `WARNING`, never `ERROR`
+   - Add a collision counter per ingestion run.
+   - Emit ONE summary log at the end:
+       "Ingestion completed with X symbol collisions skipped"
+   - Ensure ingestion remains fully idempotent.
+   - Do NOT remove collision detection logic.
+
+2. **Logging quality**
+   - Replace noisy per-coin error logs with structured logs.
+   - Use consistent fields:
+       symbol, source, existing_external_id, new_external_id
+   - Errors should ONLY be used for:
+       - API failures
+       - DB connection issues
+       - Schema violations
+
+3. **Architecture cleanup**
+   - Review ingestion-related files and:
+       - Remove unused helpers, dead code, or redundant scripts
+       - Ensure naming consistency
+   - Do NOT change working database schemas unless necessary.
+
+4. **README.md improvements**
+   - Add a clear section:
+       "Handling Symbol Collisions"
+   - Explain:
+       - Why symbol collisions are unavoidable in crypto data
+       - Why `(source, external_id)` is the canonical identifier
+       - Why collisions are skipped instead of overwritten
+   - Add a short ingestion flow diagram (text-based is fine).
+   - Write in a professional, human engineering tone.
+   - Do NOT mention AI, Cursor, or automated tools.
+
+5. **Final expectation**
+   - The application should deploy cleanly.
+   - Logs should look intentional and production-grade.
+   - A manager reviewing this should conclude:
+       “This engineer anticipated real-world data inconsistencies and designed for them.”
+
+Apply changes directly to the codebase and README.

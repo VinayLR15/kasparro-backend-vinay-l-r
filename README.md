@@ -15,23 +15,22 @@ The project follows a clean service-oriented architecture:
 ### Idempotent Ingestion
 The pipeline is designed to be fully idempotent. It uses a checkpoint system to resume from the last successful record and ensures that duplicate data is never created, even if the ETL runs multiple times or fails mid-run.
 
-### Handling Identity Collisions
-A major challenge in crypto data is symbol collision (e.g., multiple "SOL" or "LTC" tokens). Kasparro addresses this by:
-1. Creating a **Canonical Coin** record for a unique symbol.
-2. Mapping provider-specific **External IDs** to that canonical coin.
-3. Detecting conflicts where a provider attempts to map a symbol to a different ID than already stored. These are logged as warnings and skipped to prevent data corruption.
+### Handling Symbol Collisions
 
-## Real-World Challenges Addressed
+In the fragmented world of crypto data, symbol collisions (e.g., multiple different assets using "SOL" or "WETH") are common. Kasparro is designed with this real-world inconsistency in mind:
 
-- **Provider Inconsistency**: Different providers use different internal naming conventions. We map these to a single internal identifier.
-- **Fault Tolerance**: The system handles API failures, rate limiting, and database disconnects gracefully.
-- **Deployment Ready**: Optimized for modern cloud platforms like Railway with multi-stage Docker builds and automated health checks.
+- **Canonical Identity**: The system uses `(source, external_id)` as the unique canonical identifier for an asset mapping.
+- **Resilience**: When a symbol already exists but maps to a different `external_id` at the same source, the ingestion pipeline intentionally **skips** the new record. 
+- **Integrity**: We prioritize data integrity over coverage—no overwriting or duplicating happens automatically. These events are logged as `INFO` with a summary count at the end of each run.
 
-## Key Endpoints
-- `GET /health` - Service and Database status
-- `GET /data` - Paginated canonical coin list with source metadata
-- `GET /stats` - ETL pipeline metrics and last run info
-- `GET /docs` - Interactive OpenAPI documentation
+#### Ingestion Flow
+1. **Fetch**: Stream assets from provider (CoinGecko/CoinPaprika).
+2. **Normalize**: Map symbol to a canonical internal ID.
+3. **Validate**: Check if this symbol already exists from this source.
+   - If `external_id` matches → Skip (Already ingested).
+   - If `external_id` differs → Skip & Log (Collision detected).
+   - If new → Insert & Link.
+4. **Checkpoint**: Update source cursor for next run.
 
 ## Technical Stack
 - **Language**: Python 3.11

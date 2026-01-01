@@ -94,6 +94,7 @@ def _process_stream(source_name: str, items: Iterable[Dict[str, Any]], fail_afte
     """
     session = SessionLocal()
     processed = 0
+    collisions = 0
     run = None
     try:
         run = ETLRun(source=source_name, status="running")
@@ -157,11 +158,17 @@ def _process_stream(source_name: str, items: Iterable[Dict[str, Any]], fail_afte
                 ).scalar_one_or_none()
                 
                 if existing_coin_source:
-                    # Log warning and skip if external_id differs
+                    # Intentionally skip symbol collisions (different external_id)
                     if existing_coin_source.external_id != record_id:
-                        logger.warning(
-                            "Skipping %s: already mapped to %s from source %s, new=%s",
-                            coin.symbol, existing_coin_source.external_id, source_name, record_id
+                        collisions += 1
+                        logger.info(
+                            "Symbol collision detected and skipped",
+                            extra={
+                                "symbol": coin.symbol,
+                                "source": source_name,
+                                "existing_external_id": existing_coin_source.external_id,
+                                "new_external_id": record_id
+                            }
                         )
                         continue
                 else:
@@ -185,7 +192,7 @@ def _process_stream(source_name: str, items: Iterable[Dict[str, Any]], fail_afte
             session.add(run)
             session.commit()
 
-            # failure injection (checkpoint already committed above, safe to fail)
+            # failure injection
             if fail_after and processed >= fail_after:
                 run.injected_failure = True
                 run.status = "failed"
@@ -193,6 +200,7 @@ def _process_stream(source_name: str, items: Iterable[Dict[str, Any]], fail_afte
                 session.commit()
                 raise RuntimeError(f"Injected failure after {processed} records")
 
+        logger.info("Ingestion completed for %s with %s symbol collisions skipped", source_name, collisions)
         run.status = "success"
         session.add(run)
         session.commit()
