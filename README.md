@@ -1,288 +1,49 @@
-```md
-# Kasparro – Backend & ETL Systems Assignment
+# Kasparro – Backend & ETL Systems
 
 ## Project Overview
-
-This project implements a **production-grade backend and ETL system** as specified in the Kasparro Backend & ETL Systems assignment.
-
-The system ingests crypto asset data from multiple sources (APIs and CSV), stores raw payloads, normalizes data into a unified schema, and exposes a FastAPI service for querying, monitoring, and observability.
-
-The implementation focuses on **robust ETL design**, **incremental ingestion**, **failure recovery**, **clean architecture**, and **cloud-ready deployment**.
-
----
+A production-grade backend and ETL system for crypto asset data. The system ingests data from multiple sources (CoinGecko, CoinPaprika APIs, and CSV), normalizes it into a unified canonical schema, and exposes a FastAPI service for querying and observability.
 
 ## Architecture
+- **api/**: FastAPI routes and middleware.
+- **ingestion/**: ETL orchestration and source adapters.
+- **services/**: Business logic for API and ETL processes.
+- **core/**: Database models, configuration, and logging setup.
+- **schemas/**: Pydantic validation schemas.
+- **tests/**: Automated test suite.
 
-### API Layer
-- **Location**: `api/main.py`
-- Built using **FastAPI**
-- Routes only; no business logic in controllers
-- Exposes health, data, stats, and documentation endpoints
-
-### ETL Layer
-- **Location**: `ingestion/run.py`
-- Orchestrates ingestion from all data sources
-- Writes raw data and normalized assets
-- Records ETL runs and checkpoints
-
-### Data Storage
-- **raw_assets**: Stores raw source payloads unchanged
-- **coins**: Stores canonical coin entities (unified by symbol across all sources)
-- **coin_sources**: Links source-specific data to canonical coins (enables identity unification)
-- **etl_runs**: Tracks ETL execution metadata
-- **etl_checkpoints**: Stores per-source incremental progress
-
-### Clean Separation
-```
-
-api/          → API routes
-ingestion/   → ETL orchestration
-services/    → Business logic
-schemas/     → Pydantic validation
-core/        → DB, config, logging
-tests/       → Automated tests
-
-````
-
----
-
-## ETL Design
-
-### Data Sources
-- CoinPaprika API (configured via environment variable)
-- CoinGecko API
-- CSV file (`ingestion/data/assets.csv`)
-
-### Incremental Ingestion
-- Each source maintains a checkpoint (`last_record_id`)
-- On restart, ETL resumes after the checkpoint
-- Prevents reprocessing of already ingested data
-
-### Normalization & Identity Unification
-- **Canonical Coins**: Coins are unified by symbol (case-insensitive) across all sources
-- Same coin from different sources (e.g., Bitcoin from CoinGecko and CoinPaprika) creates **one canonical coin**
-- Source-specific data is linked to canonical coins via `coin_sources` table
-- Example: BTC from CoinGecko and BTC from CoinPaprika → 1 canonical BTC coin with 2 source mappings
-
-### Idempotent Writes
-- Raw records are unique by `(source, record_id)`
-- Canonical coins are unique by `symbol` (normalized to uppercase)
-- Source mappings are unique by `(coin_id, source)` and `(source, external_id)`
-- Duplicate inserts are safely ignored
-
----
-
-## P2 Highlight — Failure Injection & Strong Recovery
-
-### Controlled Failure Injection
-Configure using environment variable:
-```bash
-ETL_FAIL_AFTER_N_RECORDS=2
-````
-
-* ETL intentionally raises an exception after processing N records
-* Simulates partial pipeline failure
-
-### Checkpoint Commit
-
-* Checkpoints are committed **before** failure
-* Ensures progress is durable
-
-### Recovery
-
-* Restart ETL without the failure variable
-* ETL resumes from the next record
-* No partially committed or duplicate data
-
----
+## Key Features
+- **Canonical Normalization**: Unifies assets from different sources by symbol into a single identity.
+- **Incremental Ingestion**: Uses checkpoints to resume from the last processed record.
+- **Failure Recovery**: Durable checkpointing ensures data integrity even after mid-run failures.
+- **Dockerized Environment**: Multi-stage build for optimized production deployment.
+- **Observability**: Structured JSON logging and dedicated health/stats endpoints.
 
 ## API Endpoints
+- `GET /`: Service status metadata.
+- `GET /health`: DB connectivity and last ETL run status.
+- `GET /stats`: Aggregated ETL run metrics (records, processed records, last success/failure).
+- `GET /data`: Paginated asset list with unified source mappings and search.
 
-### GET /
+## Setup and Running
 
-Returns service metadata and available endpoints
+### Prerequisites
+- Docker & Docker Compose
+- PostgreSQL (if running outside Docker)
 
-### GET /data
-
-* Pagination with `limit` and `offset`
-* Optional `q` search filter (searches coin symbol and name)
-* Returns canonical coins with their source mappings:
-
-  * `request_id`
-  * `api_latency_ms`
-  * Paging metadata
-  * `data` array with:
-    * `id`: Canonical coin ID
-    * `symbol`: Coin symbol (normalized, uppercase)
-    * `name`: Coin name
-    * `sources`: Array of source mappings, each with:
-      * `source`: Source name (coinpaprika, coingecko, csv)
-      * `external_id`: Source-specific ID
-      * `source_metadata`: Source-specific raw data
-
-### GET /health
-
-* Database connectivity status
-* Last ETL run summary
-
-### GET /stats
-
-* Aggregated ETL metrics from `etl_runs`
-* Records processed
-* Success and failure timestamps
-
-### GET /docs
-
-* Swagger API documentation
-
----
-
-## Live Deployment (Railway)
-
-**Base URL**
-
-```
-https://kasparro-backend-vinay-l-r-production.up.railway.app
-```
-
-**Note**: The deployment requires a PostgreSQL database. If endpoints return database connection errors, ensure a PostgreSQL service is provisioned in the Railway project.
-
-**Quick Checks**
-
-* `/health`
-* `/data?limit=5`
-* `/docs`
-
----
-
-## How to Run Locally
-
-### Docker
-
+### Local Development (Docker)
 ```bash
 docker compose up --build
 ```
+The API will be available at `http://localhost:5000`.
 
-Verify:
-
+### Running Tests
 ```bash
-curl http://localhost:8000/health
+export PYTHONPATH=$PYTHONPATH:.
+python -m pytest
 ```
 
-### Tests
-
-```bash
-python -m pytest -q
-```
-
-Tests use isolated SQLite databases and mocked external sources.
-
----
-
-## Smoke Test / Live Demo
-
-### Step 1: Start the System
-
-```bash
-docker compose up --build
-```
-
-Confirm:
-
-```bash
-curl http://localhost:8000/health
-```
-
-### Step 2: Initial ETL Run
-
-```bash
-curl http://localhost:8000/stats
-```
-
-Expected:
-
-* `status: "success"`
-* Non-zero `records_processed`
-
-### Step 3: Inject Controlled Failure
-
-```bash
-docker compose down
-ETL_FAIL_AFTER_N_RECORDS=2 docker compose up --build
-```
-
-Expected:
-
-* ETL fails after 2 records
-* Failure recorded in `etl_runs`
-
-### Step 4: Recovery Run
-
-```bash
-docker compose down
-unset ETL_FAIL_AFTER_N_RECORDS
-docker compose up --build
-```
-
-Expected:
-
-* ETL resumes from checkpoint
-* No duplicate records
-* Successful run recorded
-
-### Step 5: API Validation
-
-```bash
-curl "http://localhost:8000/data?limit=5"
-curl http://localhost:8000/health
-curl http://localhost:8000/stats
-```
-
----
-
-## Cloud Deployment Notes
-
-* Fully Dockerized and cloud-ready
-* Compatible with AWS, GCP, and Azure
-* Database configurable via `DATABASE_URL`
-* Logs emitted as structured JSON to stdout
-* ETL can be scheduled using cron or cloud schedulers
-
----
-
-## Configuration
-
-Environment variables:
-
-* `DATABASE_URL`
-* `COINPAPRIKA_API_KEY`
-* `ETL_FAIL_AFTER_N_RECORDS` (optional)
-
-No secrets are hardcoded in the repository.
-
----
-
-## Repository
-
-GitHub:
-
-```
-https://github.com/VinayLR15/kasparro-backend-vinay-l-r
-```
-
----
-
-## Submission Checklist
-
-* [x] Docker runs locally without errors
-* [x] All tests passing
-* [x] ETL recovery verified
-* [x] No secrets committed
-* [x] Public cloud deployment working
-
----
-
-## Status
-
-**Assignment complete, deployed, and production-ready.**
-
+## Environment Variables
+- `DATABASE_URL`: PostgreSQL connection string.
+- `COINPAPRIKA_API_KEY`: API key for CoinPaprika (optional for free tier).
+- `COINGECKO_API_KEY`: API key for CoinGecko.
+- `ETL_FAIL_AFTER_N_RECORDS`: For testing failure recovery logic.
