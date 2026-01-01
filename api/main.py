@@ -80,3 +80,9 @@ def stats():
             "total_runs": 0,
             "total_records_processed": 0,
         }
+
+if __name__ == "__main__":
+    import uvicorn
+    # Use PORT from environment variable (standard for Railway)
+    port = int(os.environ.get("PORT", 8080))
+    uvicorn.run(app, host="0.0.0.0", port=port)
