@@ -158,11 +158,11 @@ def _process_stream(source_name: str, items: Iterable[Dict[str, Any]], fail_afte
                 ).scalar_one_or_none()
                 
                 if existing_coin_source:
-                    # Intentionally skip symbol collisions (different external_id)
+                    # Intentionally skip symbol collisions (different external_id) - expected behavior
                     if existing_coin_source.external_id != record_id:
                         collisions += 1
-                        logger.info(
-                            "Symbol collision detected and skipped",
+                        logger.warning(
+                            "Skipping coin mapping due to symbol collision (expected behavior)",
                             extra={
                                 "symbol": coin.symbol,
                                 "source": source_name,

@@ -24,13 +24,24 @@ async def startup():
 
 @app.get("/")
 def root():
-    return {"service": "kasparro-backend", "status": "running"}
+    return {
+        "service": "Kasparro Backend",
+        "status": "running",
+        "endpoints": {
+            "docs": "/docs",
+            "health": "/health",
+            "data": "/data",
+            "stats": "/stats",
+            "etl_run": "/etl/run (POST)"
+        }
+    }
 
 @app.get("/health")
 def health():
+    db_status = check_connection()
     return {
-        "status": "ok",
-        "db": check_connection(),
+        "status": "ok" if db_status else "error",
+        "db": db_status,
         "last_etl": ETLService.last_run()
     }
 
