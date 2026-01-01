@@ -10,7 +10,7 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
-    postgresql-client \
+    libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
@@ -28,6 +28,11 @@ ENV PATH=/home/appuser/.local/bin:$PATH
 
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY --from=builder /root/.local /home/appuser/.local
 
 RUN adduser --disabled-password --gecos "" appuser
@@ -38,6 +43,6 @@ RUN chmod +x /app/entrypoint.sh
 
 USER appuser
 
-EXPOSE 8000
+EXPOSE 5000
 
 CMD ["/app/entrypoint.sh"]

@@ -41,19 +41,6 @@ class CoinSource(Base):
     # Relationship to canonical coin
     coin = relationship("Coin", back_populates="sources")
 
-# Keep Asset for backward compatibility during migration, but it's deprecated
-class Asset(Base):
-    """Deprecated: Use Coin and CoinSource instead."""
-    __tablename__ = "assets"
-    id = Column(Integer, primary_key=True)
-    symbol = Column(String, nullable=False)
-    name = Column(String, nullable=True)
-    external_id = Column(String, nullable=False)
-    source = Column(String, nullable=False)
-    run_metadata = Column("metadata", JSON, nullable=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    __table_args__ = (UniqueConstraint('external_id','source',name='uq_asset_external_source'),)
-
 class Checkpoint(Base):
     __tablename__ = "etl_checkpoints"
     id = Column(Integer, primary_key=True)
