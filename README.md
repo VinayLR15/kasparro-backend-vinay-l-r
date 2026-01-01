@@ -1,39 +1,30 @@
 # Kasparro Backend & ETL
 
-A production-grade backend and ETL system for crypto asset data. This system ingests data from multiple providers, normalizes it into a unified canonical schema, and exposes a high-performance FastAPI service for querying.
+Production-grade crypto data ingestion and API service.
 
-## System Architecture
+## Architecture
+- **API (FastAPI)**: Non-blocking web server with automated health checks and documentation.
+- **ETL (Background Processing)**: Idempotent ingestion pipeline that processes data from CoinPaprika, CoinGecko, and CSV without blocking the main thread.
+- **Persistence (PostgreSQL)**: Unified schema mapping multiple data sources to canonical coin entities.
 
-The project follows a clean service-oriented architecture:
-- **ETL Pipeline**: Idempotent ingestion engine with source-specific adapters (CoinGecko, CoinPaprika, CSV).
-- **Database Layer**: PostgreSQL backend using SQLAlchemy ORM for structured data storage and identity unification.
-- **API Layer**: FastAPI-driven REST service providing standard endpoints and automated documentation.
-- **Normalization Engine**: Logic to unify assets across fragmented data sources into a single "Source of Truth".
+## Ingestion Strategy & Reliability
 
-## Data Ingestion Design
+### Non-Blocking Startup
+To ensure 100% availability on Railway, the web server starts immediately. Data ingestion is triggered via the `/etl/run` endpoint as a background task, preventing "Application failed to respond" timeouts.
 
-### Idempotent Ingestion
-The pipeline is designed to be fully idempotent. It uses a checkpoint system to resume from the last successful record and ensures that duplicate data is never created, even if the ETL runs multiple times or fails mid-run.
+### Symbol Collision Handling
+Symbol collisions are expected in crypto data. The system uses a strict idempotent strategy:
+1. Assets are uniquely identified by `(source, external_id)`.
+2. If a new asset shares a symbol with an existing one but has a different `external_id`, it is logged as a `WARNING` and skipped.
+3. This prevents data corruption while ensuring the pipeline remains stable.
 
-### Handling Symbol Collisions
+## API Usage
+- `GET /`: Service status
+- `GET /health`: Detailed system health
+- `POST /etl/run`: Trigger ingestion pipeline
+- `GET /data`: Paginated asset querying
+- `GET /docs`: Interactive Swagger UI
 
-In the fragmented world of crypto data, symbol collisions (e.g., multiple different assets using "SOL" or "WETH") are common. Kasparro is designed with this real-world inconsistency in mind:
-
-- **Canonical Identity**: The system uses `(source, external_id)` as the unique canonical identifier for an asset mapping.
-- **Resilience**: When a symbol already exists but maps to a different `external_id` at the same source, the ingestion pipeline intentionally **skips** the new record. 
-- **Integrity**: We prioritize data integrity over coverage—no overwriting or duplicating happens automatically. These events are logged as `INFO` with a summary count at the end of each run.
-
-#### Ingestion Flow
-1. **Fetch**: Stream assets from provider (CoinGecko/CoinPaprika).
-2. **Normalize**: Map symbol to a canonical internal ID.
-3. **Validate**: Check if this symbol already exists from this source.
-   - If `external_id` matches → Skip (Already ingested).
-   - If `external_id` differs → Skip & Log (Collision detected).
-   - If new → Insert & Link.
-4. **Checkpoint**: Update source cursor for next run.
-
-## Technical Stack
-- **Language**: Python 3.11
-- **Framework**: FastAPI
-- **Database**: PostgreSQL / SQLAlchemy
-- **Containerization**: Docker (Multi-stage)
+## Railway Deployment
+- The app binds to `0.0.0.0` on the port provided by the environment variable `$PORT`.
+- Ensure `DATABASE_URL` is configured in service variables.

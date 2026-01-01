@@ -1,0 +1,126 @@
+You are a senior backend engineer.
+Review and correct this FastAPI + ETL backend so it runs reliably on Railway.
+
+Objectives
+
+Fix the “Application failed to respond” error on Railway.
+
+Ensure the HTTP server starts immediately and is reachable.
+
+Ensure ETL logic does NOT block application startup.
+
+Follow Railway best practices for networking and ports.
+
+Improve logging severity levels (warnings ≠ errors).
+
+REQUIRED FIXES
+1. Server Startup
+
+The FastAPI app must bind to 0.0.0.0
+
+The port must be read from the PORT environment variable
+
+Do NOT hardcode ports
+
+Expected pattern:
+
+PORT = int(os.getenv("PORT", 8080))
+uvicorn.run(app, host="0.0.0.0", port=PORT)
+
+2. Root & Health Endpoints
+
+Add:
+
+GET / → returns service status JSON
+
+GET /health → returns application + DB health
+
+These endpoints must respond immediately.
+
+3. ETL Execution Safety
+
+ETL must not run on import or startup
+
+ETL should only run:
+
+via a background task
+
+OR via a dedicated API endpoint
+
+Replace any startup ETL execution with:
+
+@app.post("/etl/run")
+
+4. Symbol Collision Handling
+
+Symbol collisions across CoinPaprika and CoinGecko are expected
+
+The ingestion must be idempotent
+
+On conflict:
+
+Skip insertion
+
+Log as WARNING, not ERROR
+
+Never crash or retry infinitely
+
+Example logic:
+
+if existing and existing.external_id != new_external_id:
+    logger.warning(...)
+    continue
+
+5. Logging Hygiene
+
+Change:
+
+logger.error → logger.warning for expected collisions
+
+Reserve error only for fatal issues
+
+6. Docker & Railway Compatibility
+
+Ensure Dockerfile does not hardcode ports
+
+Use Railway-compatible CMD/ENTRYPOINT
+
+Server must start even if ETL has conflicts
+
+Project Cleanup
+
+Remove unused scripts, dead code, duplicate ETL runners
+
+Ensure folder structure is clean and production-ready
+
+README.md (VERY IMPORTANT)
+
+Rewrite README to include:
+
+Clear system architecture
+
+ETL lifecycle explanation
+
+Idempotent ingestion strategy
+
+Symbol collision handling rationale
+
+Railway deployment notes
+
+The README should read like a production engineering document, not a tutorial.
+
+Final Result
+
+Application must respond successfully at:
+
+/
+
+/health
+
+/docs
+
+Railway should show Deployment successful
+
+No blocking logs on startup
+
+Proceed with minimal changes, production quality only.
