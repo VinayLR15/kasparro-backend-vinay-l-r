@@ -1,0 +1,56 @@
+2026-01-01T06:33:50.000000000Z [inf]  Starting Container
+2026-01-01T06:33:51.298428842Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:33:51.298435883Z [err]  Traceback (most recent call last):
+2026-01-01T06:33:51.298442335Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:33:51.298449119Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:33:51.298455097Z [err]  ModuleNotFoundError: No module named 'core'
+2026-01-01T06:33:51.700950369Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:33:52.310663513Z [err]  Traceback (most recent call last):
+2026-01-01T06:33:52.310667768Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:33:52.310672881Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:33:52.310677078Z [err]  ModuleNotFoundError: No module named 'core'
+2026-01-01T06:33:53.056312420Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:33:53.612009159Z [err]  Traceback (most recent call last):
+2026-01-01T06:33:53.612019477Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:33:53.612025951Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:33:53.612034058Z [err]  ModuleNotFoundError: No module named 'core'
+2026-01-01T06:33:54.425403078Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:33:54.991164093Z [err]  Traceback (most recent call last):
+2026-01-01T06:33:54.991172613Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:33:54.991180001Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:33:54.991185108Z [err]  ModuleNotFoundError: No module named 'core'
+2026-01-01T06:33:55.815879096Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:33:56.367163453Z [err]  ModuleNotFoundError: No module named 'core'
+2026-01-01T06:33:56.367184346Z [err]  Traceback (most recent call last):
+2026-01-01T06:33:56.367205203Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:33:56.367215080Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:33:57.022439082Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:33:57.631549065Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:33:57.631549431Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:33:57.631574413Z [err]  Traceback (most recent call last):
+2026-01-01T06:33:57.631591606Z [err]  ModuleNotFoundError: No module named 'core'
+2026-01-01T06:33:58.399064424Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:33:58.824587723Z [err]  Traceback (most recent call last):
+2026-01-01T06:33:58.824593195Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:33:58.824597991Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:33:58.824603697Z [err]  ModuleNotFoundError: No module named 'core'
+2026-01-01T06:33:59.399515891Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:33:59.949167872Z [err]  Traceback (most recent call last):
+2026-01-01T06:33:59.949172996Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:33:59.949179620Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:33:59.949184251Z [err]  ModuleNotFoundError: No module named 'core'
+2026-01-01T06:34:00.755797886Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:34:01.405200208Z [err]  Traceback (most recent call last):
+2026-01-01T06:34:01.405204480Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:34:01.405208758Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:34:01.405213210Z [err]  ModuleNotFoundError: No module named 'core'
+2026-01-01T06:34:01.913374581Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:34:02.482503736Z [err]  Traceback (most recent call last):
+2026-01-01T06:34:02.482515882Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:34:02.482524973Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:34:02.482534981Z [err]  ModuleNotFoundError: No module named 'core'
+2026-01-01T06:34:03.711478304Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:34:04.276340967Z [err]  Traceback (most recent call last):
+2026-01-01T06:34:04.276350098Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:34:04.276357880Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:34:04.276363598Z [err]  ModuleNotFoundError: No module named 'core'
