@@ -75,6 +75,9 @@ def SessionLocal():
     return _SessionLocal()
 
 
+engine = get_engine()
+
+
 def check_connection() -> bool:
     try:
         engine = get_engine()

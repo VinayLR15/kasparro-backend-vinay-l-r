@@ -221,6 +221,8 @@ def run_all():
     
     fail_after_env = settings.ETL_FAIL_AFTER_N_RECORDS
     fail_after = int(fail_after_env) if fail_after_env else None
+    
+    any_failed = False
     # sources in order
     sources = [("coinpaprika", CoinPaprikaSource()), ("coingecko", CoinGeckoSource()), ("csv", CSVSource())]
     for name, src in sources:
@@ -229,7 +231,11 @@ def run_all():
             _process_stream(name, src.list_assets(), fail_after=fail_after)
         except Exception as e:
             logger.exception("Failed to process source %s: %s. Continuing with next source.", name, e)
+            any_failed = True
             continue
+            
+    if any_failed:
+        raise RuntimeError("One or more ETL sources failed")
 
 
 if __name__ == "__main__":

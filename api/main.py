@@ -73,8 +73,11 @@ def root():
 
 @app.get("/health")
 def health():
-    # 🚨 MUST NEVER FAIL
-    return {"status": "ok"}
+    return {
+        "status": "ok",
+        "db": check_connection(),
+        "last_etl": ETLService.last_run()
+    }
 
 
 @app.get("/data")
