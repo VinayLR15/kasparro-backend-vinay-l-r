@@ -12,61 +12,57 @@ class APIService:
         List canonical coins with their source mappings.
         Returns serialized dicts suitable for JSON response.
         """
+        session = SessionLocal()
         try:
-            with SessionLocal() as session:
-                # Query canonical coins
-                stmt = select(Coin)
-                if q:
-                    q_pattern = f"%{q}%"
-                    stmt = stmt.where(
-                        or_(
-                            Coin.symbol.ilike(q_pattern),
-                            Coin.name.ilike(q_pattern)
-                        )
+            # Query canonical coins
+            stmt = select(Coin)
+            if q:
+                q_pattern = f"%{q}%"
+                stmt = stmt.where(
+                    or_(
+                        Coin.symbol.ilike(q_pattern),
+                        Coin.name.ilike(q_pattern)
                     )
-                
-                # Get total count
-                total_stmt = select(sql_func.count(Coin.id))
-                if q:
-                    q_pattern = f"%{q}%"
-                    total_stmt = total_stmt.where(
-                        or_(
-                            Coin.symbol.ilike(q_pattern),
-                            Coin.name.ilike(q_pattern)
-                        )
+                )
+            
+            # Get total count
+            total_stmt = select(sql_func.count(Coin.id))
+            if q:
+                q_pattern = f"%{q}%"
+                total_stmt = total_stmt.where(
+                    or_(
+                        Coin.symbol.ilike(q_pattern),
+                        Coin.name.ilike(q_pattern)
                     )
-                total = session.execute(total_stmt).scalar() or 0
+                )
+            total = session.execute(total_stmt).scalar() or 0
+            
+            # Apply pagination
+            stmt = stmt.order_by(Coin.symbol).limit(limit).offset(offset)
+            coins = session.execute(stmt).scalars().all()
+            
+            # Serialize to JSON-friendly dicts
+            serialized_data = []
+            for coin in coins:
+                # Find the primary source record for this coin to get its ID/Symbol/Name mapping
+                # In this unified model, a "Coin" is the canonical entity.
+                # The user expects id, symbol, name, source, and external_id.
+                # Since a coin can have multiple sources, we take the first available one for this flat view.
+                primary_source = session.execute(
+                    select(CoinSource).where(CoinSource.coin_id == coin.id).limit(1)
+                ).scalar_one_or_none()
                 
-                # Apply pagination
-                stmt = stmt.order_by(Coin.symbol).limit(limit).offset(offset)
-                coins = session.execute(stmt).scalars().all()
-                
-                # Serialize to JSON-friendly dicts
-                serialized_data = []
-                for coin in coins:
-                    # Get sources
-                    sources_stmt = select(CoinSource).where(CoinSource.coin_id == coin.id)
-                    sources = session.execute(sources_stmt).scalars().all()
-                    
-                    coin_dict = {
-                        "id": coin.id,
-                        "symbol": coin.symbol,
-                        "name": coin.name,
-                        "created_at": coin.created_at.isoformat() if coin.created_at else None,
-                        "updated_at": coin.updated_at.isoformat() if coin.updated_at else None,
-                        "sources": [
-                            {
-                                "source": s.source,
-                                "external_id": s.external_id,
-                                "metadata": s.source_metadata,
-                                "created_at": s.created_at.isoformat() if s.created_at else None
-                            }
-                            for s in sources
-                        ]
-                    }
-                    serialized_data.append(coin_dict)
-                
-                return serialized_data, total
+                serialized_data.append({
+                    "id": coin.id,
+                    "symbol": coin.symbol,
+                    "name": coin.name,
+                    "source": primary_source.source if primary_source else "unknown",
+                    "external_id": primary_source.external_id if primary_source else "unknown"
+                })
+            
+            return serialized_data, total
         except Exception as e:
-            logger.exception("Error in list_assets: %s", e)
+            logger.error("Database error in list_assets: %s", str(e), exc_info=True)
             return [], 0
+        finally:
+            session.close()
