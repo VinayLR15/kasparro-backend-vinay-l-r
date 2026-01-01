@@ -1,49 +1,40 @@
-# Kasparro – Backend & ETL Systems
+# Kasparro Backend & ETL
 
-## Project Overview
-A production-grade backend and ETL system for crypto asset data. The system ingests data from multiple sources (CoinGecko, CoinPaprika APIs, and CSV), normalizes it into a unified canonical schema, and exposes a FastAPI service for querying and observability.
+A production-grade backend and ETL system for crypto asset data. This system ingests data from multiple providers, normalizes it into a unified canonical schema, and exposes a high-performance FastAPI service for querying.
 
-## Architecture
-- **api/**: FastAPI routes and middleware.
-- **ingestion/**: ETL orchestration and source adapters.
-- **services/**: Business logic for API and ETL processes.
-- **core/**: Database models, configuration, and logging setup.
-- **schemas/**: Pydantic validation schemas.
-- **tests/**: Automated test suite.
+## System Architecture
 
-## Key Features
-- **Canonical Normalization**: Unifies assets from different sources by symbol into a single identity.
-- **Incremental Ingestion**: Uses checkpoints to resume from the last processed record.
-- **Failure Recovery**: Durable checkpointing ensures data integrity even after mid-run failures.
-- **Dockerized Environment**: Multi-stage build for optimized production deployment.
-- **Observability**: Structured JSON logging and dedicated health/stats endpoints.
+The project follows a clean service-oriented architecture:
+- **ETL Pipeline**: Idempotent ingestion engine with source-specific adapters (CoinGecko, CoinPaprika, CSV).
+- **Database Layer**: PostgreSQL backend using SQLAlchemy ORM for structured data storage and identity unification.
+- **API Layer**: FastAPI-driven REST service providing standard endpoints and automated documentation.
+- **Normalization Engine**: Logic to unify assets across fragmented data sources into a single "Source of Truth".
 
-## API Endpoints
-- `GET /`: Service status metadata.
-- `GET /health`: DB connectivity and last ETL run status.
-- `GET /stats`: Aggregated ETL run metrics (records, processed records, last success/failure).
-- `GET /data`: Paginated asset list with unified source mappings and search.
+## Data Ingestion Design
 
-## Setup and Running
+### Idempotent Ingestion
+The pipeline is designed to be fully idempotent. It uses a checkpoint system to resume from the last successful record and ensures that duplicate data is never created, even if the ETL runs multiple times or fails mid-run.
 
-### Prerequisites
-- Docker & Docker Compose
-- PostgreSQL (if running outside Docker)
+### Handling Identity Collisions
+A major challenge in crypto data is symbol collision (e.g., multiple "SOL" or "LTC" tokens). Kasparro addresses this by:
+1. Creating a **Canonical Coin** record for a unique symbol.
+2. Mapping provider-specific **External IDs** to that canonical coin.
+3. Detecting conflicts where a provider attempts to map a symbol to a different ID than already stored. These are logged as warnings and skipped to prevent data corruption.
 
-### Local Development (Docker)
-```bash
-docker compose up --build
-```
-The API will be available at `http://localhost:5000`.
+## Real-World Challenges Addressed
 
-### Running Tests
-```bash
-export PYTHONPATH=$PYTHONPATH:.
-python -m pytest
-```
+- **Provider Inconsistency**: Different providers use different internal naming conventions. We map these to a single internal identifier.
+- **Fault Tolerance**: The system handles API failures, rate limiting, and database disconnects gracefully.
+- **Deployment Ready**: Optimized for modern cloud platforms like Railway with multi-stage Docker builds and automated health checks.
 
-## Environment Variables
-- `DATABASE_URL`: PostgreSQL connection string.
-- `COINPAPRIKA_API_KEY`: API key for CoinPaprika (optional for free tier).
-- `COINGECKO_API_KEY`: API key for CoinGecko.
-- `ETL_FAIL_AFTER_N_RECORDS`: For testing failure recovery logic.
+## Key Endpoints
+- `GET /health` - Service and Database status
+- `GET /data` - Paginated canonical coin list with source metadata
+- `GET /stats` - ETL pipeline metrics and last run info
+- `GET /docs` - Interactive OpenAPI documentation
+
+## Technical Stack
+- **Language**: Python 3.11
+- **Framework**: FastAPI
+- **Database**: PostgreSQL / SQLAlchemy
+- **Containerization**: Docker (Multi-stage)

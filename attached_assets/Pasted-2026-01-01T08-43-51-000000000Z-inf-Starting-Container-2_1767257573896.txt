@@ -1,0 +1,16 @@
+2026-01-01T08:43:51.000000000Z [inf]  Starting Container
+2026-01-01T08:43:52.417331535Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T08:44:22.464207142Z [err]  Coin WETH already mapped from source coinpaprika with different external_id: weth-weth vs eth-ethereum-token
+2026-01-01T08:46:22.840826717Z [err]  Coin FORM already mapped from source coinpaprika with different external_id: form-form vs form-four
+2026-01-01T08:46:22.840832185Z [err]  Coin USDF already mapped from source coinpaprika with different external_id: usdf-falcon-finance vs usdf-astherus-usdf
+2026-01-01T08:46:22.840836850Z [err]  Coin SOL already mapped from source coinpaprika with different external_id: sol-solana vs sol-binance-peg-sol
+2026-01-01T08:47:02.882541295Z [err]  Coin COW already mapped from source coinpaprika with different external_id: cow-cow-protocol-token vs cow-cow-protocol
+2026-01-01T08:47:32.866148555Z [err]  Coin PUFF already mapped from source coinpaprika with different external_id: puff-puff-the-dragon vs puff-puff-token
+2026-01-01T08:47:53.032879542Z [err]  Coin LA already mapped from source coinpaprika with different external_id: la-latoken vs la-lagrange
+2026-01-01T08:47:53.032885236Z [err]  Coin ZEC already mapped from source coinpaprika with different external_id: zec-zcash vs zec-zcash-token
+2026-01-01T08:47:57.099245060Z [err]  Coin DYDX already mapped from source coinpaprika with different external_id: dydx-dydx-chain vs dydx-dydx
+2026-01-01T08:47:59.672463417Z [err]  Coin LTC already mapped from source coinpaprika with different external_id: ltc-litecoin vs ltc-litecoin-token
+2026-01-01T08:48:49.906934595Z [err]  Coin TON already mapped from source coinpaprika with different external_id: toncoin-the-open-network vs ton-tokamak-network
+2026-01-01T08:49:30.174217965Z [err]  Coin HONEY already mapped from source coinpaprika with different external_id: honey-hivemapper vs honey-honey1
+2026-01-01T08:49:34.935878580Z [err]  Coin CORE already mapped from source coinpaprika with different external_id: core-core-dao vs core-coreum
+2026-01-01T08:49:54.949321291Z [err]  Coin FORM already mapped from source coinpaprika with different external_id: form-form vs form-formation-finance

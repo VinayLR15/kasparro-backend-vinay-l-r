@@ -1,0 +1,133 @@
+You are a senior backend engineer reviewing a production-grade ETL + API system.
+
+Your task is to correct and harden the data ingestion pipeline for a crypto data backend that integrates CoinPaprika and CoinGecko, while maintaining clean architecture and professional standards.
+
+1. Fix the Coin Symbol Collision Issue (Critical)
+
+Problem:
+
+Multiple coins share the same symbol but map to different external_id values across providers (e.g., WETH, SOL, LTC).
+
+Current ingestion logic crashes or raises errors on these conflicts.
+
+Required Fix:
+
+Make ingestion idempotent and resilient.
+
+When a coin with the same (symbol, source) already exists:
+
+If external_id matches → skip silently
+
+If external_id differs → log a warning and skip insertion
+
+Do not crash, do not overwrite, do not duplicate
+
+Expected logic pattern:
+
+existing = get_coin_by_symbol_and_source(symbol, source)
+
+if existing:
+    if existing.external_id != new_external_id:
+        logger.warning(
+            f"Skipping {symbol}: already mapped to "
+            f"{existing.external_id}, new={new_external_id}"
+        )
+        continue
+else:
+    insert_coin(...)
+
+
+Apply this pattern consistently across all ingestion modules where coins/assets are created or mapped.
+
+2. Ensure Production-Grade Behavior
+
+Ingestion must continue even if multiple conflicts occur
+
+Logging level should be WARNING, not ERROR
+
+No exceptions should be thrown for symbol collisions
+
+Database integrity must remain intact
+
+3. Update README.md (Very Important)
+
+Rewrite README.md with a clear, structured, professional tone, covering:
+
+Sections to include:
+
+Project Overview
+
+What the system does (ETL + API)
+
+Data sources used (CoinPaprika, CoinGecko)
+
+System Architecture
+
+Data ingestion pipeline
+
+Database layer (PostgreSQL)
+
+API layer
+
+Deployment (Railway)
+
+Data Ingestion Design
+
+Idempotent ingestion
+
+Handling inconsistent external identifiers
+
+Logging and fault tolerance
+
+Real-World Challenges Addressed
+
+Symbol collisions across crypto providers
+
+Why symbol ≠ unique identifier
+
+How the system avoids corruption and downtime
+
+Why This Design Works in Production
+
+Stability
+
+Observability
+
+Scalability
+
+Write this as if it were reviewed by a senior backend engineer.
+Do not mention AI tools, generators, or assistants.
+
+4. Clean the Repository
+
+Remove unused, duplicate, or experimental files
+
+Remove commented-out blocks that are no longer relevant
+
+Ensure folder structure is clean and intentional
+
+Keep only production-relevant code and configs
+
+5. Code Quality Expectations
+
+Follow clean architecture principles
+
+Use meaningful function and variable names
+
+Add comments only where they add clarity (no over-commenting)
+
+Ensure formatting and imports are consistent
+
+6. Final Outcome
+
+After changes:
+
+App should deploy successfully
+
+Ingestion should complete without crashing
+
+Conflicting coins should be skipped with logs
+
+README should clearly explain design decisions, not just features
+
+This project should look like it was built thoughtfully by a backend engineer with real-world ETL experience.

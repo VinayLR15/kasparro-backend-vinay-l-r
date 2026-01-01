@@ -157,12 +157,13 @@ def _process_stream(source_name: str, items: Iterable[Dict[str, Any]], fail_afte
                 ).scalar_one_or_none()
                 
                 if existing_coin_source:
-                    # Update external_id if different (shouldn't happen, but handle it)
+                    # Log warning and skip if external_id differs
                     if existing_coin_source.external_id != record_id:
                         logger.warning(
-                            "Coin %s already mapped from source %s with different external_id: %s vs %s",
-                            coin.symbol, source_name, existing_coin_source.external_id, record_id
+                            "Skipping %s: already mapped to %s from source %s, new=%s",
+                            coin.symbol, existing_coin_source.external_id, source_name, record_id
                         )
+                        continue
                 else:
                     # Create new source mapping
                     coin_source = CoinSource(
