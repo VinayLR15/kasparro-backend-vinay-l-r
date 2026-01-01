@@ -10,3 +10,15 @@ pytest==7.4.0
 httpx==0.25.0
 alembic==1.11.1
 python-json-logger==2.0.7
+alembic
+fastapi
+httpx
+pandas
+psycopg2-binary
+pydantic
+pytest
+python-dotenv
+python-json-logger
+requests
+SQLAlchemy
+uvicorn

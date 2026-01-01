@@ -69,6 +69,12 @@ def get_session():
         db.close()
 
 
+def SessionLocal():
+    if _SessionLocal is None:
+        get_engine()
+    return _SessionLocal()
+
+
 def check_connection() -> bool:
     try:
         engine = get_engine()
