@@ -22,8 +22,16 @@ app = FastAPI(title="Kasparro Backend & ETL")
 async def startup():
     logger.info("Kasparro Backend started")
 
-@app.get("/")
+@app.get("/", status_code=200)
 def root():
+    return {"status": "ok"}
+
+@app.head("/")
+def root_head():
+    return
+
+@app.get("/info")
+def info():
     return {
         "service": "Kasparro Backend",
         "status": "running",
