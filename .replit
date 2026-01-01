@@ -42,3 +42,4 @@ run = ["python", "-m", "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port",
 
 [userenv.shared]
 COINPAPRIKA_API_KEY = "not_required"
+COINGECKO_API_KEY = "not_required"
