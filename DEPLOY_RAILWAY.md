@@ -29,11 +29,13 @@ Railway requires a database to store your crypto data:
 You need to tell the app where the database is and provide API keys:
 1. Click on your **Service** (the one created from your GitHub repo).
 2. Go to the **Variables** tab.
-3. Click **+ New Variable** and add these:
-   - `DATABASE_URL`: Click "Reference Variable" and select `${{Postgres.DATABASE_URL}}`.
+3. Click **+ New Variable** -> **Add Variable from another Service**.
+4. Select your **Postgres** service and choose **DATABASE_URL**.
+   - *Important*: Ensure the key name is exactly `DATABASE_URL`.
+5. Add these additional variables:
    - `COINPAPRIKA_API_KEY`: Set to `none` (the app handles it if empty).
    - `COINGECKO_API_KEY`: Set to `none`.
-4. Railway will automatically redeploy with these settings.
+6. Railway will automatically redeploy with these settings.
 
 ## Step 5: Verify Deployment
 1. Once the deploy is finished, go to the **Settings** tab of your service.

@@ -1,0 +1,221 @@
+2026-01-01T06:37:12.000000000Z [inf]  Starting Container
+2026-01-01T06:37:13.239584537Z [err]  Traceback (most recent call last):
+2026-01-01T06:37:13.239598128Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:37:13.239606500Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:37:13.239614701Z [err]    File "/app/core/db.py", line 78, in <module>
+2026-01-01T06:37:13.239623657Z [err]      engine = get_engine()
+2026-01-01T06:37:13.239631384Z [err]               ^^^^^^^^^^^^
+2026-01-01T06:37:13.239637519Z [err]    File "/app/core/db.py", line 31, in get_engine
+2026-01-01T06:37:13.239643906Z [err]      raise RuntimeError("DATABASE_URL is not set")
+2026-01-01T06:37:13.239650217Z [err]  RuntimeError: DATABASE_URL is not set
+2026-01-01T06:37:13.239757153Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:37:13.960996240Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:37:14.624526060Z [err]               ^^^^^^^^^^^^
+2026-01-01T06:37:14.624536453Z [err]    File "/app/core/db.py", line 31, in get_engine
+2026-01-01T06:37:14.624544969Z [err]      raise RuntimeError("DATABASE_URL is not set")
+2026-01-01T06:37:14.624553568Z [err]  RuntimeError: DATABASE_URL is not set
+2026-01-01T06:37:14.624568781Z [err]  Traceback (most recent call last):
+2026-01-01T06:37:14.624577045Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:37:14.624585172Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:37:14.624594663Z [err]    File "/app/core/db.py", line 78, in <module>
+2026-01-01T06:37:14.624601635Z [err]      engine = get_engine()
+2026-01-01T06:37:15.423773129Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:37:16.078069620Z [err]  Traceback (most recent call last):
+2026-01-01T06:37:16.078076801Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:37:16.078082215Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:37:16.078086700Z [err]    File "/app/core/db.py", line 78, in <module>
+2026-01-01T06:37:16.078091196Z [err]      engine = get_engine()
+2026-01-01T06:37:16.078095650Z [err]               ^^^^^^^^^^^^
+2026-01-01T06:37:16.078103787Z [err]    File "/app/core/db.py", line 31, in get_engine
+2026-01-01T06:37:16.078108774Z [err]      raise RuntimeError("DATABASE_URL is not set")
+2026-01-01T06:37:16.078113990Z [err]  RuntimeError: DATABASE_URL is not set
+2026-01-01T06:37:16.854856328Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:37:17.610130955Z [err]  Traceback (most recent call last):
+2026-01-01T06:37:17.610136232Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:37:17.610141204Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:37:17.610146819Z [err]    File "/app/core/db.py", line 78, in <module>
+2026-01-01T06:37:17.610153602Z [err]      engine = get_engine()
+2026-01-01T06:37:17.610158518Z [err]               ^^^^^^^^^^^^
+2026-01-01T06:37:17.610163207Z [err]    File "/app/core/db.py", line 31, in get_engine
+2026-01-01T06:37:17.610168105Z [err]      raise RuntimeError("DATABASE_URL is not set")
+2026-01-01T06:37:17.610173770Z [err]  RuntimeError: DATABASE_URL is not set
+2026-01-01T06:37:18.440256135Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:37:19.129445485Z [err]  Traceback (most recent call last):
+2026-01-01T06:37:19.129454724Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:37:19.129460899Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:37:19.129466705Z [err]    File "/app/core/db.py", line 78, in <module>
+2026-01-01T06:37:19.129471811Z [err]      engine = get_engine()
+2026-01-01T06:37:19.129478593Z [err]               ^^^^^^^^^^^^
+2026-01-01T06:37:19.129484833Z [err]    File "/app/core/db.py", line 31, in get_engine
+2026-01-01T06:37:19.129489697Z [err]      raise RuntimeError("DATABASE_URL is not set")
+2026-01-01T06:37:19.129494833Z [err]  RuntimeError: DATABASE_URL is not set
+2026-01-01T06:37:19.675477313Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:37:20.408126500Z [err]  Traceback (most recent call last):
+2026-01-01T06:37:20.408139569Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:37:20.408148075Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:37:20.408155099Z [err]    File "/app/core/db.py", line 78, in <module>
+2026-01-01T06:37:20.408162801Z [err]      engine = get_engine()
+2026-01-01T06:37:20.408170580Z [err]               ^^^^^^^^^^^^
+2026-01-01T06:37:20.408179504Z [err]    File "/app/core/db.py", line 31, in get_engine
+2026-01-01T06:37:20.408187327Z [err]      raise RuntimeError("DATABASE_URL is not set")
+2026-01-01T06:37:20.408195121Z [err]  RuntimeError: DATABASE_URL is not set
+2026-01-01T06:37:21.290414713Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:37:21.897408870Z [err]  Traceback (most recent call last):
+2026-01-01T06:37:21.897414065Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:37:21.897420185Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:37:21.897425775Z [err]    File "/app/core/db.py", line 78, in <module>
+2026-01-01T06:37:21.897431034Z [err]      engine = get_engine()
+2026-01-01T06:37:21.897436260Z [err]               ^^^^^^^^^^^^
+2026-01-01T06:37:21.897441018Z [err]    File "/app/core/db.py", line 31, in get_engine
+2026-01-01T06:37:21.897446469Z [err]      raise RuntimeError("DATABASE_URL is not set")
+2026-01-01T06:37:21.897451326Z [err]  RuntimeError: DATABASE_URL is not set
+2026-01-01T06:37:22.465367524Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:37:23.170648558Z [err]  Traceback (most recent call last):
+2026-01-01T06:37:23.170658557Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:37:23.170665293Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:37:23.170670905Z [err]    File "/app/core/db.py", line 78, in <module>
+2026-01-01T06:37:23.170676577Z [err]      engine = get_engine()
+2026-01-01T06:37:23.170682433Z [err]               ^^^^^^^^^^^^
+2026-01-01T06:37:23.170687629Z [err]    File "/app/core/db.py", line 31, in get_engine
+2026-01-01T06:37:23.170692528Z [err]      raise RuntimeError("DATABASE_URL is not set")
+2026-01-01T06:37:23.170697301Z [err]  RuntimeError: DATABASE_URL is not set
+2026-01-01T06:37:24.016730017Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:37:24.707672223Z [err]  Traceback (most recent call last):
+2026-01-01T06:37:24.707680958Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:37:24.707687075Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:37:24.707692293Z [err]    File "/app/core/db.py", line 78, in <module>
+2026-01-01T06:37:24.707697398Z [err]      engine = get_engine()
+2026-01-01T06:37:24.707702368Z [err]               ^^^^^^^^^^^^
+2026-01-01T06:37:24.707708233Z [err]    File "/app/core/db.py", line 31, in get_engine
+2026-01-01T06:37:24.707713624Z [err]      raise RuntimeError("DATABASE_URL is not set")
+2026-01-01T06:37:24.707718484Z [err]  RuntimeError: DATABASE_URL is not set
+2026-01-01T06:37:25.790676165Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:37:26.467268552Z [err]  Traceback (most recent call last):
+2026-01-01T06:37:26.467274608Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:37:26.467280443Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:37:26.467286502Z [err]    File "/app/core/db.py", line 78, in <module>
+2026-01-01T06:37:26.467291459Z [err]      engine = get_engine()
+2026-01-01T06:37:26.467297380Z [err]               ^^^^^^^^^^^^
+2026-01-01T06:37:26.467303754Z [err]    File "/app/core/db.py", line 31, in get_engine
+2026-01-01T06:37:26.467309143Z [err]      raise RuntimeError("DATABASE_URL is not set")
+2026-01-01T06:37:26.467314128Z [err]  RuntimeError: DATABASE_URL is not set
+2026-01-01T06:37:27.125095392Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:37:27.794164923Z [err]  Traceback (most recent call last):
+2026-01-01T06:37:27.794171154Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:37:27.794176820Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:37:27.794184980Z [err]    File "/app/core/db.py", line 78, in <module>
+2026-01-01T06:37:27.794192030Z [err]      engine = get_engine()
+2026-01-01T06:37:27.794201497Z [err]               ^^^^^^^^^^^^
+2026-01-01T06:37:27.794209720Z [err]    File "/app/core/db.py", line 31, in get_engine
+2026-01-01T06:37:27.794218275Z [err]      raise RuntimeError("DATABASE_URL is not set")
+2026-01-01T06:37:27.794225859Z [err]  RuntimeError: DATABASE_URL is not set
+2026-01-01T06:38:07.844984330Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:38:07.845007090Z [err]  Traceback (most recent call last):
+2026-01-01T06:38:07.845015584Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:38:07.845021716Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:38:07.845026686Z [err]    File "/app/core/db.py", line 78, in <module>
+2026-01-01T06:38:07.845031888Z [err]      engine = get_engine()
+2026-01-01T06:38:07.845039346Z [err]               ^^^^^^^^^^^^
+2026-01-01T06:38:07.845044097Z [err]    File "/app/core/db.py", line 31, in get_engine
+2026-01-01T06:38:07.845048728Z [err]      raise RuntimeError("DATABASE_URL is not set")
+2026-01-01T06:38:07.845053349Z [err]  RuntimeError: DATABASE_URL is not set
+2026-01-01T06:38:07.845060729Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:38:07.845065151Z [err]  Traceback (most recent call last):
+2026-01-01T06:38:07.845070292Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:38:07.845074902Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:38:07.845079881Z [err]    File "/app/core/db.py", line 78, in <module>
+2026-01-01T06:38:07.845086525Z [err]      engine = get_engine()
+2026-01-01T06:38:07.845091215Z [err]               ^^^^^^^^^^^^
+2026-01-01T06:38:07.845097178Z [err]    File "/app/core/db.py", line 31, in get_engine
+2026-01-01T06:38:07.845102143Z [err]      raise RuntimeError("DATABASE_URL is not set")
+2026-01-01T06:38:07.845108971Z [err]  RuntimeError: DATABASE_URL is not set
+2026-01-01T06:38:07.846165427Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:38:07.846175093Z [err]    File "/app/core/db.py", line 78, in <module>
+2026-01-01T06:38:07.846181462Z [err]      engine = get_engine()
+2026-01-01T06:38:07.846185150Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:38:07.846187987Z [err]               ^^^^^^^^^^^^
+2026-01-01T06:38:07.846194439Z [err]    File "/app/core/db.py", line 31, in get_engine
+2026-01-01T06:38:07.846198378Z [err]  Traceback (most recent call last):
+2026-01-01T06:38:07.846201049Z [err]      raise RuntimeError("DATABASE_URL is not set")
+2026-01-01T06:38:07.846207705Z [err]  RuntimeError: DATABASE_URL is not set
+2026-01-01T06:38:07.846211167Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:38:07.846219507Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:38:07.846227260Z [err]    File "/app/core/db.py", line 78, in <module>
+2026-01-01T06:38:07.846234649Z [err]      engine = get_engine()
+2026-01-01T06:38:07.846242496Z [err]               ^^^^^^^^^^^^
+2026-01-01T06:38:07.846250079Z [err]    File "/app/core/db.py", line 31, in get_engine
+2026-01-01T06:38:07.846257067Z [err]      raise RuntimeError("DATABASE_URL is not set")
+2026-01-01T06:38:07.846265662Z [err]  RuntimeError: DATABASE_URL is not set
+2026-01-01T06:38:07.846273307Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:38:07.846281675Z [err]  Traceback (most recent call last):
+2026-01-01T06:38:07.846288921Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:38:07.846539541Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:38:07.846559495Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:38:07.846567905Z [err]  Traceback (most recent call last):
+2026-01-01T06:38:07.846574025Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:38:07.846579112Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:38:07.846585480Z [err]    File "/app/core/db.py", line 78, in <module>
+2026-01-01T06:38:07.846591114Z [err]      engine = get_engine()
+2026-01-01T06:38:07.846596642Z [err]               ^^^^^^^^^^^^
+2026-01-01T06:38:07.846601742Z [err]    File "/app/core/db.py", line 31, in get_engine
+2026-01-01T06:38:07.846606670Z [err]      raise RuntimeError("DATABASE_URL is not set")
+2026-01-01T06:38:07.846611897Z [err]  RuntimeError: DATABASE_URL is not set
+2026-01-01T06:38:07.846616406Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:38:07.846621497Z [err]  Traceback (most recent call last):
+2026-01-01T06:38:07.846626410Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:38:07.846631201Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:38:07.846636215Z [err]    File "/app/core/db.py", line 78, in <module>
+2026-01-01T06:38:07.846641043Z [err]      engine = get_engine()
+2026-01-01T06:38:07.846648497Z [err]               ^^^^^^^^^^^^
+2026-01-01T06:38:07.846653579Z [err]    File "/app/core/db.py", line 31, in get_engine
+2026-01-01T06:38:07.846658334Z [err]      raise RuntimeError("DATABASE_URL is not set")
+2026-01-01T06:38:07.846663383Z [err]  RuntimeError: DATABASE_URL is not set
+2026-01-01T06:38:08.368812772Z [err]  Traceback (most recent call last):
+2026-01-01T06:38:08.368819315Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:38:08.368824013Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:38:08.368828418Z [err]    File "/app/core/db.py", line 78, in <module>
+2026-01-01T06:38:08.368832605Z [err]      engine = get_engine()
+2026-01-01T06:38:08.368836590Z [err]               ^^^^^^^^^^^^
+2026-01-01T06:38:08.368840610Z [err]    File "/app/core/db.py", line 31, in get_engine
+2026-01-01T06:38:08.368846150Z [err]      raise RuntimeError("DATABASE_URL is not set")
+2026-01-01T06:38:08.368851302Z [err]  RuntimeError: DATABASE_URL is not set
+2026-01-01T06:38:08.933463377Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:38:09.615121257Z [err]    File "/app/core/db.py", line 31, in get_engine
+2026-01-01T06:38:09.615130024Z [err]      raise RuntimeError("DATABASE_URL is not set")
+2026-01-01T06:38:09.615137278Z [err]  RuntimeError: DATABASE_URL is not set
+2026-01-01T06:38:09.615159224Z [err]  Traceback (most recent call last):
+2026-01-01T06:38:09.615163755Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:38:09.615168411Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:38:09.615173011Z [err]    File "/app/core/db.py", line 78, in <module>
+2026-01-01T06:38:09.615179542Z [err]      engine = get_engine()
+2026-01-01T06:38:09.615184232Z [err]               ^^^^^^^^^^^^
+2026-01-01T06:38:10.190905020Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:38:10.886955543Z [err]  Traceback (most recent call last):
+2026-01-01T06:38:10.886960063Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:38:10.886964588Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:38:10.886968583Z [err]    File "/app/core/db.py", line 78, in <module>
+2026-01-01T06:38:10.886972797Z [err]      engine = get_engine()
+2026-01-01T06:38:10.886977070Z [err]               ^^^^^^^^^^^^
+2026-01-01T06:38:10.886981309Z [err]    File "/app/core/db.py", line 31, in get_engine
+2026-01-01T06:38:10.886985835Z [err]      raise RuntimeError("DATABASE_URL is not set")
+2026-01-01T06:38:10.886990178Z [err]  RuntimeError: DATABASE_URL is not set
+2026-01-01T06:38:11.431794178Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:38:12.124272316Z [err]      raise RuntimeError("DATABASE_URL is not set")
+2026-01-01T06:38:12.124284099Z [err]  RuntimeError: DATABASE_URL is not set
+2026-01-01T06:38:12.124327396Z [err]  Traceback (most recent call last):
+2026-01-01T06:38:12.124332341Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:38:12.124337226Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:38:12.124342291Z [err]    File "/app/core/db.py", line 78, in <module>
+2026-01-01T06:38:12.124346833Z [err]      engine = get_engine()
+2026-01-01T06:38:12.124351231Z [err]               ^^^^^^^^^^^^
+2026-01-01T06:38:12.124356793Z [err]    File "/app/core/db.py", line 31, in get_engine
+2026-01-01T06:38:12.692417730Z [inf]  Starting Kasparro Backend on port 8080
+2026-01-01T06:38:13.384101044Z [err]  Traceback (most recent call last):
+2026-01-01T06:38:13.384106099Z [err]    File "/app/ingestion/run.py", line 6, in <module>
+2026-01-01T06:38:13.384110577Z [err]      from core.db import SessionLocal, engine
+2026-01-01T06:38:13.384114988Z [err]    File "/app/core/db.py", line 78, in <module>
+2026-01-01T06:38:13.384119112Z [err]      engine = get_engine()
+2026-01-01T06:38:13.384123984Z [err]               ^^^^^^^^^^^^
+2026-01-01T06:38:13.384128434Z [err]    File "/app/core/db.py", line 31, in get_engine
+2026-01-01T06:38:13.384132842Z [err]      raise RuntimeError("DATABASE_URL is not set")
+2026-01-01T06:38:13.384137920Z [err]  RuntimeError: DATABASE_URL is not set
